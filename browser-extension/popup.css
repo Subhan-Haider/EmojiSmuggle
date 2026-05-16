@@ -187,6 +187,27 @@ textarea:focus, input:focus {
   text-align: center;
   border-top: 1px solid var(--border);
   padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attribution {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.attribution a {
+  color: var(--green) !important;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.attribution a:hover {
+  text-decoration: underline;
 }
 
 .footer a {
