@@ -8,7 +8,7 @@
 *Hide secret text, encrypted messages, and compressed images inside innocent emoji strings.*
 
 [![NPM Version](https://img.shields.io/npm/v/emoji-smuggle?color=00FF41&style=flat-square)](https://www.npmjs.com/package/emoji-smuggle)
-[![License: MIT](https://img.shields.io/badge/License-MIT-BC13FE.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-00D1FF.svg?style=flat-square)](https://github.com/Subhan-Haider/EmojiSmuggle/pulls)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-white?style=flat-square&logo=vercel)](https://emoji.subhan.tech)
 

@@ -5,7 +5,7 @@
   
   <p>
     <a href="https://www.npmjs.com/package/emoji-smuggle"><img src="https://img.shields.io/npm/v/emoji-smuggle" alt="NPM Version" /></a>
-    <a href="https://github.com/EmojiSmuggle/emoji-smuggle/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/emoji-smuggle" alt="License" /></a>
+    <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square" alt="License: Apache 2.0" /></a>
     <a href="https://bundlephobia.com/package/emoji-smuggle"><img src="https://img.shields.io/bundlephobia/minzip/emoji-smuggle" alt="Bundle Size" /></a>
   </p>
 </div>

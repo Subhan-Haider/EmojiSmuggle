@@ -18,7 +18,7 @@
     "sdk"
   ],
   "author": "EmojiSmuggle",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "crypto-js": "^4.2.0",
     "pako": "^2.1.0"
