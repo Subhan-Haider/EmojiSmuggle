@@ -14,6 +14,7 @@
 - **Client-Side Only:** No data ever leaves your browser. Zero servers, zero logs.
 - **Custom Carriers:** Choose from various emoji packs (Cyberpunk, Space, Nature, etc.).
 - **Developer SDK:** Fully functional [npm package](./emoji-smuggle) for integrating steganography into your own apps.
+- **Open API:** No API keys or registration required. Start building instantly.
 
 ## 📦 Developer SDK
 

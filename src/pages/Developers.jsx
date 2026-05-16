@@ -70,7 +70,7 @@ const HeroSection = () => (
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
           <Link to="/dashboard" className="cyber-button px-8 py-4 text-sm w-full sm:w-auto flex items-center justify-center gap-2">
-            <Key size={16} /> Get API Key
+            <Zap size={16} /> Get Started Now
           </Link>
           <Link to="/about" className="px-8 py-4 rounded-xl border border-white/10 hover:bg-white/5 text-white font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2">
             <Book size={16} /> Read Docs
@@ -86,8 +86,7 @@ const HeroSection = () => (
         <CodeBlock language="bash" code={`# Install the official SDK
 $ npm install emoji-smuggle
 
-# Initialize client
-$ smuggle auth --token=YOUR_API_KEY
+# Initialize and use
 $ smuggle encode "Hello" --carrier="📦"
 > Output: 📦​‌‌​‌​​​‌​‌​​‌​​‌​‌​​‌‌​‌​​‌‌​​‌`} />
       </motion.div>
@@ -157,8 +156,7 @@ const CodeExamples = () => {
     javascript: `const response = await fetch('https://api.emoji.subhan.tech/v1/encode', {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer sk_live_...'
+    'Content-Type': 'application/json'
   },
   body: JSON.stringify({
     payload: 'Target acquired',
@@ -174,7 +172,6 @@ console.log(data.emoji); // 🕵️​‌‌​‌​​​‌​‌​​‌​
 
 url = "https://api.emoji.subhan.tech/v1/encode"
 headers = {
-    "Authorization": "Bearer sk_live_...",
     "Content-Type": "application/json"
 }
 data = {
@@ -187,7 +184,6 @@ data = {
 response = requests.post(url, json=data, headers=headers)
 print(response.json()["emoji"])`,
     curl: `curl -X POST https://api.emoji.subhan.tech/v1/encode \\
-  -H "Authorization: Bearer sk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{
     "payload": "Target acquired",
