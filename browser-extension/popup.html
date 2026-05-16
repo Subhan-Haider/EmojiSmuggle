@@ -26,7 +26,10 @@
         <textarea id="msg-input" placeholder="Type your secret message..."></textarea>
       </div>
       <div class="field">
-        <label>Password (Optional)</label>
+        <div class="field-header">
+          <label>Password (Optional)</label>
+          <button id="toggle-pass-encode" class="text-link-btn">Show</button>
+        </div>
         <input type="password" id="msg-pass" placeholder="Leave empty for no encryption">
       </div>
       <button id="btn-encode" class="primary-btn">Smuggle Into Emojis</button>
@@ -48,7 +51,10 @@
         <textarea id="decode-input" placeholder="Paste emojis here..."></textarea>
       </div>
       <div class="field">
-        <label>Password (If encrypted)</label>
+        <div class="field-header">
+          <label>Password (If encrypted)</label>
+          <button id="toggle-pass-decode" class="text-link-btn">Show</button>
+        </div>
         <input type="password" id="decode-pass" placeholder="Enter password">
       </div>
       <button id="btn-decode" class="primary-btn">Extract Secret</button>

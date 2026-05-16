@@ -77,6 +77,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Password Visibility Toggle
+  const setupToggle = (btnId, inputId) => {
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    btn.addEventListener('click', () => {
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      btn.textContent = isPass ? 'Hide' : 'Show';
+    });
+  };
+
+  setupToggle('toggle-pass-encode', 'msg-pass');
+  setupToggle('toggle-pass-decode', 'decode-pass');
+
   outputMsg.addEventListener('click', () => copyToClipboard(outputMsg));
 
   // Decode logic
