@@ -262,59 +262,7 @@ const ApiPlayground = () => {
   );
 };
 
-const RateLimits = () => (
-  <section className="py-20 px-6 max-w-7xl mx-auto">
-    <SectionTitle icon={<Activity size={16} />} title="Limits" subtitle="Fair Usage & Pricing" />
-    <div className="grid md:grid-cols-3 gap-6">
-      {[
-        { tier: 'Hobby', price: 'Free', limit: '100 req/day', desc: 'Perfect for testing and small personal scripts.', color: 'gray-500' },
-        { tier: 'Pro', price: '$19/mo', limit: '10,000 req/day', desc: 'For production apps and heavy integrations.', color: 'cyber-green' },
-        { tier: 'Enterprise', price: 'Custom', limit: 'Unlimited', desc: 'Dedicated nodes and SLA guarantees.', color: 'cyber-purple' }
-      ].map((t, i) => (
-        <div key={i} className="glass p-8 relative overflow-hidden group">
-          <div className={`absolute top-0 right-0 w-32 h-32 bg-${t.color}/10 blur-3xl rounded-full group-hover:bg-${t.color}/20 transition-all`} />
-          <h3 className={`text-xl font-black uppercase text-${t.color} mb-2`}>{t.tier}</h3>
-          <div className="text-3xl font-black text-white mb-6">{t.price}</div>
-          <div className="space-y-3 mb-8">
-            <div className="flex items-center gap-2 text-sm text-gray-300">
-              <CheckCircle size={14} className={`text-${t.color}`} /> {t.limit}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-300">
-              <CheckCircle size={14} className={`text-${t.color}`} /> Image API Access
-            </div>
-          </div>
-          <p className="text-xs text-gray-500">{t.desc}</p>
-        </div>
-      ))}
-    </div>
-  </section>
-);
 
-const AuthAndWebhooks = () => (
-  <section className="py-20 px-6 bg-black/40 border-y border-white/5">
-    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16">
-      <div>
-        <SectionTitle icon={<Shield size={16} />} title="Security" subtitle="Authentication" />
-        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-          Authenticate requests using Bearer tokens. Keep your keys secure and never share them publicly. 
-          Use test keys (`sk_test_...`) for development and live keys (`sk_live_...`) for production.
-        </p>
-        <CodeBlock language="http" code={`Authorization: Bearer sk_live_xxxxxxxxxxxxxxxxxxxxxx`} />
-      </div>
-      <div>
-        <SectionTitle icon={<Globe size={16} />} title="Events" subtitle="Webhooks" />
-        <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-          Listen for asynchronous events on your server. We deliver a POST request to your endpoint when an event occurs.
-        </p>
-        <ul className="space-y-3 font-mono text-sm text-gray-300">
-          <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-cyber-green" /> message.encoded</li>
-          <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-cyber-purple" /> message.decoded</li>
-          <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-cyber-blue" /> image.processed</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-);
 
 const ApiStatus = () => (
   <section className="py-20 px-6 max-w-7xl mx-auto">
@@ -360,8 +308,6 @@ const Developers = () => {
       <ApiOverview />
       <CodeExamples />
       <ApiPlayground />
-      <RateLimits />
-      <AuthAndWebhooks />
       <ApiStatus />
     </div>
   );
