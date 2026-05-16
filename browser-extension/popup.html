@@ -31,14 +31,20 @@
       </div>
       <button id="btn-encode" class="primary-btn">Smuggle Into Emojis</button>
       <div class="output-field">
-        <label>Result</label>
+        <div class="field-header">
+          <label>Result</label>
+          <button id="btn-copy-encode" class="text-link-btn">Copy</button>
+        </div>
         <div id="msg-output" class="result-box" title="Click to copy">No carrier generated</div>
       </div>
     </div>
 
     <div id="view-decode" class="view hidden">
       <div class="field">
-        <label>Emoji Carrier</label>
+        <div class="field-header">
+          <label>Emoji Carrier</label>
+          <button id="btn-paste-decode" class="text-link-btn">Paste</button>
+        </div>
         <textarea id="decode-input" placeholder="Paste emojis here..."></textarea>
       </div>
       <div class="field">
@@ -47,7 +53,10 @@
       </div>
       <button id="btn-decode" class="primary-btn">Extract Secret</button>
       <div class="output-field">
-        <label>Decoded Message</label>
+        <div class="field-header">
+          <label>Decoded Message</label>
+          <button id="btn-copy-decode" class="text-link-btn">Copy</button>
+        </div>
         <div id="decode-output" class="result-box">Waiting for input...</div>
       </div>
     </div>

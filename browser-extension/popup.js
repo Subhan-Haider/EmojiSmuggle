@@ -54,15 +54,30 @@ document.addEventListener('DOMContentLoaded', () => {
     outputMsg.textContent = result;
   });
 
-  outputMsg.addEventListener('click', () => {
-    const text = outputMsg.textContent;
-    if (text && text !== 'No carrier generated') {
+  // Copy/Paste Helpers
+  const copyToClipboard = (element) => {
+    const text = element.textContent || element.value;
+    if (text && text !== 'No carrier generated' && text !== 'Waiting for input...') {
       navigator.clipboard.writeText(text);
-      const original = outputMsg.textContent;
-      outputMsg.textContent = 'Copied to clipboard!';
-      setTimeout(() => outputMsg.textContent = original, 1000);
+      const original = element.textContent;
+      element.textContent = 'Copied!';
+      setTimeout(() => element.textContent = original, 1000);
+    }
+  };
+
+  document.getElementById('btn-copy-encode').addEventListener('click', () => copyToClipboard(outputMsg));
+  document.getElementById('btn-copy-decode').addEventListener('click', () => copyToClipboard(outputDecode));
+  
+  document.getElementById('btn-paste-decode').addEventListener('click', async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      inputDecode.value = text;
+    } catch (err) {
+      console.error('Failed to read clipboard:', err);
     }
   });
+
+  outputMsg.addEventListener('click', () => copyToClipboard(outputMsg));
 
   // Decode logic
   const btnDecode = document.getElementById('btn-decode');

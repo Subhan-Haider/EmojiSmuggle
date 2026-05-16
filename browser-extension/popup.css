@@ -118,12 +118,36 @@ body.light .tab-btn.active {
   gap: 6px;
 }
 
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
 label {
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-dim);
+}
+
+.text-link-btn {
+  background: transparent;
+  border: none;
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.text-link-btn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 textarea, input {
