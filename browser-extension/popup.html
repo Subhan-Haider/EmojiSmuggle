@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Emoji Smuggle</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <span class="emoji">🕵️</span>
+        <span class="title">Emoji<span class="highlight">Smuggle</span></span>
+      </div>
+      <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark Mode">🌞</button>
+    </div>
+
+    <div class="tabs">
+      <button id="tab-encode" class="tab-btn active">Encode</button>
+      <button id="tab-decode" class="tab-btn">Decode</button>
+    </div>
+
+    <div id="view-encode" class="view">
+      <div class="field">
+        <label>Secret Message</label>
+        <textarea id="msg-input" placeholder="Type your secret message..."></textarea>
+      </div>
+      <div class="field">
+        <label>Password (Optional)</label>
+        <input type="password" id="msg-pass" placeholder="Leave empty for no encryption">
+      </div>
+      <button id="btn-encode" class="primary-btn">Smuggle Into Emojis</button>
+      <div class="output-field">
+        <label>Result</label>
+        <div id="msg-output" class="result-box" title="Click to copy">No carrier generated</div>
+      </div>
+    </div>
+
+    <div id="view-decode" class="view hidden">
+      <div class="field">
+        <label>Emoji Carrier</label>
+        <textarea id="decode-input" placeholder="Paste emojis here..."></textarea>
+      </div>
+      <div class="field">
+        <label>Password (If encrypted)</label>
+        <input type="password" id="decode-pass" placeholder="Enter password">
+      </div>
+      <button id="btn-decode" class="primary-btn">Extract Secret</button>
+      <div class="output-field">
+        <label>Decoded Message</label>
+        <div id="decode-output" class="result-box">Waiting for input...</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a href="https://emoji.subhan.tech" target="_blank">Open Web Platform</a>
+    </div>
+  </div>
+
+  <script src="lib/crypto-js.min.js"></script>
+  <script src="stego.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

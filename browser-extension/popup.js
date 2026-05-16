@@ -1,0 +1,88 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = {
+    encode: document.getElementById('tab-encode'),
+    decode: document.getElementById('tab-decode')
+  };
+  
+  const views = {
+    encode: document.getElementById('view-encode'),
+    decode: document.getElementById('view-decode')
+  };
+
+  const themeToggle = document.getElementById('theme-toggle');
+
+  // Load theme
+  chrome.storage.local.get(['theme'], (result) => {
+    if (result.theme === 'light') {
+      document.body.classList.add('light');
+      themeToggle.textContent = '🌙';
+    }
+  });
+
+  // Theme toggle logic
+  themeToggle.addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    themeToggle.textContent = isLight ? '🌙' : '🌞';
+    chrome.storage.local.set({ theme: isLight ? 'light' : 'dark' });
+  });
+
+  // Tab switching
+  tabs.encode.addEventListener('click', () => switchTab('encode'));
+  tabs.decode.addEventListener('click', () => switchTab('decode'));
+
+  function switchTab(tab) {
+    Object.keys(tabs).forEach(k => {
+      tabs[k].classList.toggle('active', k === tab);
+      views[k].classList.toggle('hidden', k !== tab);
+    });
+  }
+
+  // Encode logic
+  const btnEncode = document.getElementById('btn-encode');
+  const inputMsg = document.getElementById('msg-input');
+  const inputPass = document.getElementById('msg-pass');
+  const outputMsg = document.getElementById('msg-output');
+
+  btnEncode.addEventListener('click', () => {
+    const text = inputMsg.value.trim();
+    if (!text) return;
+
+    const pass = inputPass.value;
+    const carrier = getRandomEmojis('cyberpunk', 5);
+    const result = smuggleMessage(text, pass, carrier);
+    
+    outputMsg.textContent = result;
+  });
+
+  outputMsg.addEventListener('click', () => {
+    const text = outputMsg.textContent;
+    if (text && text !== 'No carrier generated') {
+      navigator.clipboard.writeText(text);
+      const original = outputMsg.textContent;
+      outputMsg.textContent = 'Copied to clipboard!';
+      setTimeout(() => outputMsg.textContent = original, 1000);
+    }
+  });
+
+  // Decode logic
+  const btnDecode = document.getElementById('btn-decode');
+  const inputDecode = document.getElementById('decode-input');
+  const inputDecodePass = document.getElementById('decode-pass');
+  const outputDecode = document.getElementById('decode-output');
+
+  btnDecode.addEventListener('click', () => {
+    const text = inputDecode.value.trim();
+    if (!text) return;
+
+    const pass = inputDecodePass.value;
+    const result = extractMessage(text, pass);
+
+    if (result.success) {
+      outputDecode.textContent = result.data;
+      outputDecode.classList.add('success');
+    } else {
+      outputDecode.textContent = `Error: ${result.error}`;
+      outputDecode.classList.remove('success');
+    }
+  });
+});
