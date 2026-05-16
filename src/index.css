@@ -50,16 +50,13 @@
   --color-cyber-green: #059669;
   --color-cyber-purple: #7c3aed;
   --color-cyber-blue: #2563eb;
-  --color-cyber-border: rgba(0, 0, 0, 0.08);
+  --color-cyber-border: rgba(0, 0, 0, 0.1);
 }
 
 .light body {
   @apply text-slate-700 bg-white;
   background-color: #ffffff !important;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.05) 0, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(37, 99, 235, 0.05) 0, transparent 50%) !important;
+  background-image: none !important; /* Pure white background for maximum clarity */
 }
 
 .light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
@@ -70,6 +67,7 @@
   color: #0f172a !important;
 }
 
+/* Fix light text contrast */
 .light .text-gray-300, .light .text-gray-400, .light .text-gray-500, .light .text-slate-300, .light .text-slate-400, .light .text-slate-500, .light .text-slate-600 {
   color: #334155 !important;
 }
@@ -78,7 +76,7 @@
   @apply text-slate-600 hover:text-slate-900 font-bold;
 }
 
-/* Global Dark-to-Light Inversion */
+/* Force all dark backgrounds to Light Mode equivalents */
 .light [class*="bg-black"], 
 .light [class*="bg-slate-9"], 
 .light [class*="bg-slate-8"],
@@ -86,19 +84,34 @@
 .light [class*="bg-[#1"] {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: #e2e8f0 !important;
 }
 
 .light .glass {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: #ffffff !important;
   border-color: #e2e8f0 !important;
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1) !important;
-  backdrop-blur: 20px !important;
+  backdrop-blur: 0px !important;
 }
 
-/* Fix Terminal specifically for Light Mode */
-.light .font-mono {
+/* Fix Transparency Classes (CRITICAL) */
+.light [class*="bg-white/"], .light [class*="bg-white/["] {
+  background-color: #f1f5f9 !important; /* Soft gray instead of transparent white */
+  border-color: #e2e8f0 !important;
   color: #0f172a !important;
+}
+
+.light [class*="border-white/"] {
+  border-color: #e2e8f0 !important;
+}
+
+.light [class*="hover:bg-white/"]:hover {
+  background-color: #e2e8f0 !important;
+}
+
+/* Terminal & Code Fixes */
+.light .font-mono {
+  color: #1e293b !important;
   text-shadow: none !important;
 }
 
@@ -113,52 +126,47 @@
 }
 
 .light .cyber-button {
-  color: #ffffff !important; /* Keep button text white */
-  box-shadow: 0 10px 20px -5px rgba(5, 150, 105, 0.2) !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #059669, #7c3aed) !important;
 }
 
-.light .bg-white\/5, .light .bg-white\/10, .light .bg-white\/20 {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
-  color: #0f172a !important;
+/* Status Elements */
+.light [class*="bg-cyber-green/"]:not(.cyber-button) {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border: 1px solid #d1fae5 !important;
 }
 
-.light .border-white\/5, .light .border-white\/10, .light .border-white\/15, .light .border-white\/20 {
-  border-color: rgba(0, 0, 0, 0.08) !important;
+.light [class*="bg-cyber-purple/"] {
+  background-color: #f5f3ff !important;
+  color: #5b21b6 !important;
+  border: 1px solid #ddd6fe !important;
 }
 
-.light .cyber-grid {
-  background-image: 
-    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px) !important;
+/* Hide Background Noise */
+.light .scanline, .light .cyber-grid, .light canvas {
+  display: none !important;
 }
 
 .light .cyber-input {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
+  box-shadow: none !important;
 }
 
-.light .cyber-input::placeholder {
-  color: #94a3b8 !important;
+/* Fix Social/Action Icons */
+.light [class*="bg-white/5"], .light [class*="bg-white/10"] {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
-.light [class*="shadow-black"] {
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1) !important;
+.light .text-red-400 {
+  color: #dc2626 !important;
 }
-
-.light [class*="bg-cyber-green/"]:not(.cyber-button) {
-  background-color: rgba(5, 150, 105, 0.1) !important;
-  color: #065f46 !important;
-}
-
-.light [class*="bg-cyber-purple/"] {
-  background-color: rgba(124, 58, 237, 0.1) !important;
-  color: #5b21b6 !important;
-}
-
-.light .scanline {
-  display: none !important; /* Hide scanlines in light mode for clarity */
+.light .bg-red-500\/10 {
+  background-color: #fef2f2 !important;
+  border: 1px solid #fee2e2 !important;
 }
 
 
