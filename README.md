@@ -1,49 +1,87 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/Subhan-Haider/EmojiSmuggle/main/public/logo.svg" width="120" alt="Emoji Smuggle Logo" />
+
 # 🕵️ Emoji Smuggle
-### Stealthy Unicode Steganography Platform
+### **Stealthy Unicode Steganography & Invisible Payload Platform**
 
-**Emoji Smuggle** is a privacy-focused platform that allows you to hide secret messages, encrypted text, and even entire images inside standard emoji strings. 
+*Hide secret text, encrypted messages, and compressed images inside innocent emoji strings.*
 
-🌐 **Live Demo:** [emoji.subhan.tech](https://emoji.subhan.tech)
+[![NPM Version](https://img.shields.io/npm/v/emoji-smuggle?color=00FF41&style=flat-square)](https://www.npmjs.com/package/emoji-smuggle)
+[![License: MIT](https://img.shields.io/badge/License-MIT-BC13FE.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-00D1FF.svg?style=flat-square)](https://github.com/Subhan-Haider/EmojiSmuggle/pulls)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-white?style=flat-square&logo=vercel)](https://emoji.subhan.tech)
+
+[**Explore the App**](https://emoji.subhan.tech) • [**Read the SDK Docs**](./emoji-smuggle/README.md) • [**API Reference**](https://emoji.subhan.tech/developers)
+
+</div>
 
 ---
 
-## 🚀 Features
+## ⚡ Why Emoji Smuggle?
 
-- **Text Smuggling:** Hide any text message inside a string of innocent emojis.
-- **Image Smuggling:** High-performance JPEG compression and embedding.
-- **Client-Side Only:** No data ever leaves your browser. Zero servers, zero logs.
-- **Custom Carriers:** Choose from various emoji packs (Cyberpunk, Space, Nature, etc.).
-- **Developer SDK:** Fully functional [npm package](./emoji-smuggle) for integrating steganography into your own apps.
-- **Open API:** No API keys or registration required. Start building instantly.
+Standard encryption is easy to spot. **Emoji Smuggle** uses advanced Unicode steganography to hide data in plain sight. To anyone watching, it's just a string of emojis. To you, it's a secure, compressed, and encrypted communication channel.
 
-## 📦 Developer SDK
+### 🚀 Key Features
 
-We offer a production-ready JavaScript SDK for developers:
+- **🛡️ Steganography:** 100% invisible payloads using Zero-Width Unicode characters.
+- **🖼️ Image Smuggling:** Ultra-efficient JPEG compression allows you to hide small images inside emojis.
+- **🔐 AES-256 Security:** Optional high-grade encryption for maximum privacy.
+- **💎 Client-Side Logic:** No data ever touches our servers. Privacy by architecture.
+- **🎨 Custom Packs:** Use themed emoji carriers: *Cyberpunk, Space, Nature, or Ghost.*
+- **📦 Dev-First SDK:** A production-ready [npm package](./emoji-smuggle) for seamless integration.
+
+---
+
+## 💻 Quick Start with SDK
+
+Integrate steganography into your own project in seconds:
 
 ```bash
 npm install emoji-smuggle
 ```
 
-Check out the [SDK Documentation](./emoji-smuggle/README.md) for full API details.
+```javascript
+import { encodeMessage, decodeMessage } from 'emoji-smuggle';
+
+// Encode a secret
+const msg = encodeMessage("Target Acquired 🎯", { carrier: 'cyberpunk' });
+console.log(msg); // 🕵️​‌‌​‌​​​‌​‌​​‌​​‌​‌​​‌‌​‌​​‌‌​​‌📦
+
+// Decode back
+const original = decodeMessage(msg);
+```
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Built With
 
-- **Frontend:** React + Vite
-- **Styling:** Tailwind CSS (Modern Cyberpunk Aesthetic)
-- **Animations:** Framer Motion
-- **Encryption:** CryptoJS (AES-256)
-- **Compression:** Pako (zlib/deflate)
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! 
-Feel free to check the [issues page](https://github.com/Subhan-Haider/EmojiSmuggle/issues).
-
-## 📄 License
-
-This project is [MIT](https://github.com/Subhan-Haider/EmojiSmuggle/blob/main/LICENSE) licensed.
+| Tech | Purpose |
+| :--- | :--- |
+| **React + Vite** | High-performance Frontend |
+| **Tailwind CSS** | Premium Cyberpunk UI |
+| **Framer Motion** | Fluid Orchestration & Animations |
+| **Pako** | Zlib/Deflate Compression |
+| **CryptoJS** | AES-256 Encryption |
 
 ---
-Built with ⚡ by [Subhan Haider](https://github.com/Subhan-Haider)
+
+## 📡 Open API
+
+Our API is fully open and registration-free. Use it to build your own privacy tools without any barriers.
+
+```bash
+curl -X POST https://api.emoji.subhan.tech/v1/encode \
+  -H "Content-Type: application/json" \
+  -d '{"payload": "Secret Data", "carrier": "random"}'
+```
+
+---
+
+<div align="center">
+
+### Built with ⚡ by [Subhan Haider](https://github.com/Subhan-Haider)
+
+*Transforming innocent emojis into secure carriers.*
+
+</div>
