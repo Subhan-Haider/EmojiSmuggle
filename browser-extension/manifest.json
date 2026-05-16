@@ -6,7 +6,8 @@
   "permissions": [
     "contextMenus",
     "storage",
-    "clipboardWrite"
+    "clipboardWrite",
+    "clipboardRead"
   ],
   "action": {
     "default_popup": "popup.html",
