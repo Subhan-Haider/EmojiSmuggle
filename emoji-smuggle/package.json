@@ -1,0 +1,30 @@
+{
+  "name": "emoji-smuggle",
+  "version": "1.0.0",
+  "description": "Hide secret data inside emojis using invisible Unicode steganography.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.js --format cjs,esm --dts",
+    "dev": "tsup src/index.js --format cjs,esm --dts --watch"
+  },
+  "keywords": [
+    "emoji",
+    "steganography",
+    "encryption",
+    "hidden-message",
+    "unicode",
+    "sdk"
+  ],
+  "author": "EmojiSmuggle",
+  "license": "MIT",
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "pako": "^2.1.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^6.0.3"
+  }
+}
