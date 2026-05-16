@@ -70,40 +70,12 @@
   color: #334155 !important;
 }
 
-.light .bg-\[\#020203\] {
+.light .nav-item {
+  @apply text-slate-700 hover:text-slate-900 hover:bg-slate-200/50;
+}
+
+.light .bg-\[\#020203\], .light .bg-black, .light .bg-black\/40, .light .bg-black\/60 {
   background-color: #f8fafc !important;
-}
-
-.light [class*="bg-black"] {
-  background-color: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-}
-
-.light [class*="bg-[#0"],
-.light [class*="bg-[#1"],
-.light [class*="bg-[#2"] {
-  background-color: #ffffff !important;
-}
-
-.light [class*="from-black"] {
-  --tw-gradient-from: transparent !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important;
-}
-.light [class*="via-black"] {
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent) !important;
-}
-.light [class*="to-black"] {
-  --tw-gradient-to: transparent !important;
-}
-
-.light [class*="bg-white/"],
-.light [class*="bg-white/["] {
-  background-color: #ffffff !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
-}
-
-.light [class*="border-white/"] {
-  border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
 .light .glass {
@@ -112,26 +84,65 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
 }
 
-.light .cyber-input {
+/* Fix Code Blocks in Light Mode */
+.light .bg-\[\#0d1117\], .light .bg-black\/40 {
   background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #0f172a !important;
-}
-.light .cyber-input::placeholder {
-  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
 }
 
-.light ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1 !important;
+.light pre code, .light pre .text-gray-300 {
+  color: #1e293b !important;
+  text-shadow: none !important;
 }
-.light ::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8 !important;
+
+.light .bg-white\/5 {
+  background-color: #f1f5f9 !important;
+}
+
+/* Fix Buttons in Light Mode */
+.light .cyber-button {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.light [class*="hover:bg-white/5"]:hover, .light [class*="hover:bg-white/10"]:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+.light .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.light .bg-white\/5, .light .bg-white\/10 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Fix Status Badges in Light Mode */
+.light .bg-cyber-green\/10 {
+  background-color: rgba(5, 150, 105, 0.1) !important;
+  color: #065f46 !important;
+}
+
+.light .text-cyber-green {
+  color: #059669 !important;
+  text-shadow: none !important;
 }
 
 .light .cyber-grid {
   background-image: 
     linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px) !important;
+}
+
+.light .cyber-input {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light .cyber-input::placeholder {
+  color: #94a3b8 !important;
 }
 
 
