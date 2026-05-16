@@ -69,13 +69,13 @@ const HeroSection = () => (
           Hide secret text and compressed images inside standard emoji payloads using our robust REST APIs and SDKs.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <button className="cyber-button px-8 py-4 text-sm w-full sm:w-auto">
+          <Link to="/dashboard" className="cyber-button px-8 py-4 text-sm w-full sm:w-auto flex items-center justify-center gap-2">
             <Key size={16} /> Get API Key
-          </button>
-          <button className="px-8 py-4 rounded-xl border border-white/10 hover:bg-white/5 text-white font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+          </Link>
+          <Link to="/about" className="px-8 py-4 rounded-xl border border-white/10 hover:bg-white/5 text-white font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2">
             <Book size={16} /> Read Docs
-          </button>
-          <a href="#" className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2 border border-transparent hover:border-white/10">
+          </Link>
+          <a href="https://github.com/Subhan-Haider/EmojiSmuggle" target="_blank" rel="noopener noreferrer" className="px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2 border border-transparent hover:border-white/10">
             <Github size={16} /> GitHub
           </a>
         </div>
@@ -84,7 +84,7 @@ const HeroSection = () => (
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.2 }} className="relative hidden lg:block">
         <div className="absolute inset-0 bg-gradient-to-tr from-cyber-green/20 to-cyber-purple/20 blur-3xl -z-10" />
         <CodeBlock language="bash" code={`# Install the official SDK
-$ npm install emoji-smuggle-sdk
+$ npm install emoji-smuggle
 
 # Initialize client
 $ smuggle auth --token=YOUR_API_KEY
@@ -102,17 +102,16 @@ const QuickStart = () => (
       <div className="glass p-8">
         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Box size={20} className="text-cyber-green" /> 1. Install SDK</h3>
         <p className="text-gray-400 text-sm mb-4">Install the package via your preferred package manager.</p>
-        <CodeBlock language="bash" code="npm install @emojismuggle/sdk" />
+        <CodeBlock language="bash" code="npm install emoji-smuggle" />
       </div>
       <div className="glass p-8">
         <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Code2 size={20} className="text-cyber-purple" /> 2. Encode Data</h3>
         <p className="text-gray-400 text-sm mb-4">Import and use the encoding methods instantly.</p>
-        <CodeBlock language="javascript" code={`import { Smuggler } from '@emojismuggle/sdk';
-
-const client = new Smuggler('sk_test_123');
-const { emoji } = await client.encode({
-  text: "Secret",
-  pack: "cyberpunk"
+        <CodeBlock language="javascript" code={`import { encodeMessage } from 'emoji-smuggle';
+        
+const { emoji } = await encodeMessage("Secret Message", {
+  carrier: "cyberpunk",
+  password: "secure_pass"
 });`} />
       </div>
     </div>
@@ -155,7 +154,7 @@ const CodeExamples = () => {
   const [activeTab, setActiveTab] = useState('javascript');
   
   const snippets = {
-    javascript: `const response = await fetch('https://api.emojismuggle.com/v1/encode', {
+    javascript: `const response = await fetch('https://api.emoji.subhan.tech/v1/encode', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -173,7 +172,7 @@ const data = await response.json();
 console.log(data.emoji); // 🕵️​‌‌​‌​​​‌​‌​​‌​​‌​‌​​‌‌​‌​​‌‌​​‌📦`,
     python: `import requests
 
-url = "https://api.emojismuggle.com/v1/encode"
+url = "https://api.emoji.subhan.tech/v1/encode"
 headers = {
     "Authorization": "Bearer sk_live_...",
     "Content-Type": "application/json"
@@ -187,7 +186,7 @@ data = {
 
 response = requests.post(url, json=data, headers=headers)
 print(response.json()["emoji"])`,
-    curl: `curl -X POST https://api.emojismuggle.com/v1/encode \\
+    curl: `curl -X POST https://api.emoji.subhan.tech/v1/encode \\
   -H "Authorization: Bearer sk_live_..." \\
   -H "Content-Type: application/json" \\
   -d '{

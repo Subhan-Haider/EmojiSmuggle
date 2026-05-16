@@ -1,16 +1,48 @@
-# React + Vite
+# 🕵️ Emoji Smuggle
+### Stealthy Unicode Steganography Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Emoji Smuggle** is a privacy-focused platform that allows you to hide secret messages, encrypted text, and even entire images inside standard emoji strings. 
 
-Currently, two official plugins are available:
+🌐 **Live Demo:** [emoji.subhan.tech](https://emoji.subhan.tech)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🚀 Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Text Smuggling:** Hide any text message inside a string of innocent emojis.
+- **Image Smuggling:** High-performance JPEG compression and embedding.
+- **Client-Side Only:** No data ever leaves your browser. Zero servers, zero logs.
+- **Custom Carriers:** Choose from various emoji packs (Cyberpunk, Space, Nature, etc.).
+- **Developer SDK:** Fully functional [npm package](./emoji-smuggle) for integrating steganography into your own apps.
 
-## Expanding the ESLint configuration
+## 📦 Developer SDK
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+We offer a production-ready JavaScript SDK for developers:
+
+```bash
+npm install emoji-smuggle
+```
+
+Check out the [SDK Documentation](./emoji-smuggle/README.md) for full API details.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend:** React + Vite
+- **Styling:** Tailwind CSS (Modern Cyberpunk Aesthetic)
+- **Animations:** Framer Motion
+- **Encryption:** CryptoJS (AES-256)
+- **Compression:** Pako (zlib/deflate)
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! 
+Feel free to check the [issues page](https://github.com/Subhan-Haider/EmojiSmuggle/issues).
+
+## 📄 License
+
+This project is [MIT](https://github.com/Subhan-Haider/EmojiSmuggle/blob/main/LICENSE) licensed.
+
+---
+Built with ⚡ by [Subhan Haider](https://github.com/Subhan-Haider)
