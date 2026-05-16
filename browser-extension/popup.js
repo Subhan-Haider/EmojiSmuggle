@@ -106,12 +106,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const pass = inputDecodePass.value;
     const result = extractMessage(text, pass);
 
+    outputDecode.classList.remove('error', 'success');
+
     if (result.success) {
       outputDecode.textContent = result.data;
       outputDecode.classList.add('success');
     } else {
-      outputDecode.textContent = `Error: ${result.error}`;
-      outputDecode.classList.remove('success');
+      const errorMap = {
+        'PASSWORD_REQUIRED': 'Password required for this message',
+        'WRONG_PASSWORD': 'Incorrect password',
+        'NO_HIDDEN_DATA': 'No hidden message found',
+        'DECODING_FAILED': 'Failed to decode message'
+      };
+      outputDecode.textContent = errorMap[result.error] || `Error: ${result.error}`;
+      outputDecode.classList.add('error');
     }
   });
 });
