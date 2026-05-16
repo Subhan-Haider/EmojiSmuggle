@@ -85,3 +85,37 @@ curl -X POST https://api.emoji.subhan.tech/v1/encode \
 *Transforming innocent emojis into secure carriers.*
 
 </div>
+## 🚀 Deployment
+
+To host Emoji Smuggle on your own Linux server, follow these steps:
+
+### 1. Build the Production Bundle
+Generate the optimized static assets:
+```bash
+npm run build
+```
+
+### 2. Configure Nginx
+Create a new site configuration in `/etc/nginx/sites-available/emoji-smuggle`:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/emoji-smuggle;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+### 3. Deploy
+Upload the contents of the `dist/` folder to `/var/www/emoji-smuggle` and restart Nginx:
+```bash
+sudo systemctl restart nginx
+```
+
+---
+
+Built with ❤️ by [EmojiSmuggle Labs](https://emoji.subhan.tech)
