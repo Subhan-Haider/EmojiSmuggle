@@ -96,6 +96,12 @@ body.light .icon-btn:hover {
   color: white;
 }
 
+body.light .tab-btn.active {
+  background: white;
+  color: var(--text);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
 .view {
   display: flex;
   flex-direction: column;
