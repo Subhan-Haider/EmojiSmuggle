@@ -6,10 +6,18 @@ object StegoEngine {
 
     fun smuggle(message: String, password: String? = null): String {
         val payload = CryptoEngine.encrypt(message, password)
-        val binary = payload.toByteArray().joinToString("") { 
-            it.toInt().and(0xFF).toString(2).padStart(8, '0') 
+        val bytes = payload.toByteArray(Charsets.UTF_8)
+        
+        val binaryChars = CharArray(bytes.size * 8)
+        var charIdx = 0
+        for (b in bytes) {
+            val byteVal = b.toInt() and 0xFF
+            for (bit in 7 downTo 0) {
+                binaryChars[charIdx++] = if (((byteVal shr bit) and 1) == 1) '1' else '0'
+            }
         }
-        val hidden = binary.map { if (it == '1') BIT_1 else BIT_0 }.joinToString("")
+        
+        val hidden = String(binaryChars)
         val carrier = listOf("🕵️", "📦", "💾", "🔌", "💻", "⚡", "🏙️", "🦾", "🥽", "🌃").shuffled().take(3)
         
         val result = StringBuilder()
@@ -29,20 +37,32 @@ object StegoEngine {
     }
 
     fun extract(encoded: String, password: String? = null): String {
-        val hidden = encoded.filter { it == BIT_1 || it == BIT_0 }
-        if (hidden.isEmpty()) return "ERROR: No hidden payload detected."
-        
-        val binary = hidden.map { if (it == BIT_1) '1' else '0' }.joinToString("")
-        val chunks = binary.chunked(8)
-        
-        val bytes = mutableListOf<Byte>()
-        for (chunk in chunks) {
-            if (chunk.length == 8) {
-                bytes.add(chunk.toInt(2).toByte())
+        val hiddenChars = CharArray(encoded.length)
+        var hiddenLen = 0
+        for (i in 0 until encoded.length) {
+            val c = encoded[i]
+            if (c == BIT_1 || c == BIT_0) {
+                hiddenChars[hiddenLen++] = c
             }
         }
         
-        val rawData = String(bytes.toByteArray())
+        if (hiddenLen == 0) return "ERROR: No hidden payload detected."
+        
+        val byteLength = hiddenLen / 8
+        if (byteLength == 0) return "ERROR: Payload too short."
+        
+        val bytes = ByteArray(byteLength)
+        for (i in 0 until byteLength) {
+            var byteVal = 0
+            for (bit in 0..7) {
+                val c = hiddenChars[i * 8 + bit]
+                val bitVal = if (c == BIT_1) 1 else 0
+                byteVal = (byteVal shl 1) or bitVal
+            }
+            bytes[i] = byteVal.toByte()
+        }
+        
+        val rawData = String(bytes, Charsets.UTF_8)
         return try {
             CryptoEngine.decrypt(rawData, password)
         } catch (e: Exception) {

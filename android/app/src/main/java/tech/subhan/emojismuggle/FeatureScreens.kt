@@ -389,8 +389,17 @@ fun ImageSmugglingScreen() {
             } else {
                 try {
                     val inputStream = context.contentResolver.openInputStream(selectedImageUri!!)
-                    val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                    var bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                     if (bitmap != null) {
+                        // Downscale dynamically to prevent memory issues and huge emoji strings
+                        val maxDimension = 320
+                        if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
+                            val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
+                            val newWidth = if (bitmap.width > bitmap.height) maxDimension else (maxDimension * ratio).toInt()
+                            val newHeight = if (bitmap.height > bitmap.width) maxDimension else (maxDimension / ratio).toInt()
+                            bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+                        }
+                        
                         val outputStream = java.io.ByteArrayOutputStream()
                         val quality = (compressionLevel * 100).toInt().coerceIn(1, 100)
                         bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, outputStream)
