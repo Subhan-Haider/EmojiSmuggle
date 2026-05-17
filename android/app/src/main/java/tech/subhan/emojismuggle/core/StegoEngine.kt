@@ -1,58 +1,71 @@
 package tech.subhan.emojismuggle.core
 
 object StegoEngine {
-    private val EMOJI_VOCAB = listOf(
-        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰",
-        "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🥸", "🤩", "🥳",
-        "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤",
-        "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤫", "🫠",
-        "✍️", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨",
-        "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐒", "🐵", "🐔", "🐧", "🐦", "🐤", "🐣", "🦆", "🦅", "🦉",
-        "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", "🐌", "🐜", "🐢", "🐍", "🦎", "🐙", "🦑", "🦐",
-        "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅", "🐆", "🦓", "🦍", "🐘", "🦏",
-        "🦛", "🐫", "🐪", "🦒", "🐃", "🐂", "🐄", "🐎", "🐖", "🐏", "🐑", "🐐", "🦌", "🐕", "🐈", "🐓",
-        "🦃", "🦚", "🦜", "🦢", "🦩", "🕊️", "🐇", "🦝", "🦡", "🦦", "🦥", "🐿️", "🦔", "🐾", "🐉", "🦖",
-        "🦕", "🌵", "🎄", "🌲", "🌳", "🌴", "🌱", "🌿", "🍀", "🍁", "🍂", "🍃", "🍄", "🌰", "🐚", "🕸️",
-        "🕷️", "🦂", "🦟", "🪰", "🪲", "🪳", "⚡", "🔥", "🌈", "☀️", "🌤️", "⛅", "🌥️", "☁️", "🌧️", "⛈️",
-        "🌩️", "❄️", "☃️", "⛄", "🌬️", "💨", "🌪️", "🌫️", "🌊", "💧", "🍕", "🍔", "🍟", "🌭", "🍿", "🍳",
-        "🧇", "🥞", "🍞", "🥐", "🥨", "🥯", "🥖", "🧀", "🥗", "🥙", "🥪", "🌮", "🌯", "🍖", "🍗", "🥩",
-        "🥓", "🍣", "🍤", "🍙", "🍘", "🍛", "🍜", "🍝", "🍢", "🍲", "🥘", "🍧", "🍨", "🍦", "🥧", "🍰",
-        "🎂", "🧁", "🍮", "🍭", "🍬", "🍫", "🍩", "🍪", "🍯", "🧂", "🧈", "🚗", "🚀", "🛸", "🎈", "🎉"
-    )
+    private const val BIT_1 = '\u200D' // ZWJ
+    private const val BIT_0 = '\u200C' // ZWNJ
 
     fun smuggle(message: String, password: String? = null): String {
         val payload = CryptoEngine.encrypt(message, password)
         val bytes = payload.toByteArray(Charsets.UTF_8)
         
-        val sb = StringBuilder()
+        val zwBuilder = StringBuilder()
         for (b in bytes) {
             val byteVal = b.toInt() and 0xFF
-            sb.append(EMOJI_VOCAB[byteVal])
+            for (bit in 7 downTo 0) {
+                val bitVal = (byteVal shr bit) and 1
+                if (bitVal == 1) {
+                    zwBuilder.append(BIT_1)
+                } else {
+                    zwBuilder.append(BIT_0)
+                }
+            }
         }
-        return sb.toString()
+        val invisiblePayload = zwBuilder.toString()
+        
+        val isImage = message.startsWith("IMAGE_STAMP:")
+        val emojiPool = if (isImage) {
+            listOf("🕵️", "🖼️", "⚡", "🔮", "💾", "🔌", "💻", "🦾", "🥽", "🌃")
+        } else {
+            listOf("🕵️", "💬", "🔒", "⚡", "📦", "💾", "💻", "🔑", "🛡️", "🔮")
+        }
+        
+        val count = if (isImage) (3..5).random() else (2..4).random()
+        val carriers = emojiPool.shuffled().take(count)
+        
+        val result = StringBuilder()
+        result.append(carriers[0])
+        result.append(invisiblePayload)
+        for (idx in 1 until carriers.size) {
+            result.append(carriers[idx])
+        }
+        return result.toString()
     }
 
     fun extract(encoded: String, password: String? = null): String {
-        val emojiToByte = HashMap<String, Byte>()
-        for (i in 0 until EMOJI_VOCAB.size) {
-            emojiToByte[EMOJI_VOCAB[i]] = i.toByte()
-        }
-        
-        val bytesList = mutableListOf<Byte>()
-        var i = 0
-        while (i < encoded.length) {
-            val codePoint = encoded.codePointAt(i)
-            val emoji = String(Character.toChars(codePoint))
-            val byteVal = emojiToByte[emoji]
-            if (byteVal != null) {
-                bytesList.add(byteVal)
+        val zwList = mutableListOf<Char>()
+        for (i in 0 until encoded.length) {
+            val c = encoded[i]
+            if (c == BIT_0 || c == BIT_1) {
+                zwList.add(c)
             }
-            i += Character.charCount(codePoint)
         }
         
-        if (bytesList.isEmpty()) return "ERROR: No hidden payload detected."
+        if (zwList.isEmpty()) return "ERROR: No hidden payload detected."
         
-        val bytes = bytesList.toByteArray()
+        val byteLength = zwList.size / 8
+        if (byteLength == 0) return "ERROR: Payload too short."
+        
+        val bytes = ByteArray(byteLength)
+        for (i in 0 until byteLength) {
+            var byteVal = 0
+            for (bit in 0..7) {
+                val c = zwList[i * 8 + bit]
+                val bitVal = if (c == BIT_1) 1 else 0
+                byteVal = (byteVal shl 1) or bitVal
+            }
+            bytes[i] = byteVal.toByte()
+        }
+        
         val rawData = String(bytes, Charsets.UTF_8)
         return try {
             CryptoEngine.decrypt(rawData, password)
