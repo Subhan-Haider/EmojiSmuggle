@@ -38,17 +38,46 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun EmojiSmuggleTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val accent = try { tech.subhan.emojismuggle.AppSettings.colorAccent } catch (e: Exception) { 0 }
+
+    val primaryColor = if (darkTheme) {
+        when (accent) {
+            1 -> PrimaryPurpleDark
+            2 -> PrimaryGreenDark
+            else -> PrimaryBlueDark
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    } else {
+        when (accent) {
+            1 -> PrimaryPurple
+            2 -> PrimaryGreen
+            else -> PrimaryBlue
+        }
     }
+
+    val colorScheme = if (darkTheme) {
+        darkColorScheme(
+            primary = primaryColor,
+            background = BackgroundDark,
+            surface = SurfaceDark,
+            onPrimary = SurfaceLight,
+            onBackground = TextDarkTheme,
+            onSurface = TextDarkTheme,
+            error = ErrorColor
+        )
+    } else {
+        lightColorScheme(
+            primary = primaryColor,
+            background = BackgroundLight,
+            surface = SurfaceLight,
+            onPrimary = SurfaceLight,
+            onBackground = TextDark,
+            onSurface = TextDark,
+            error = ErrorColor
+        )
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

@@ -4,6 +4,12 @@ import androidx.compose.ui.graphics.Color
 
 val PrimaryBlue = Color(0xFF2563EB)
 val PrimaryBlueDark = Color(0xFF3B82F6)
+
+val PrimaryPurple = Color(0xFF7C3AED)
+val PrimaryPurpleDark = Color(0xFF8B5CF6)
+
+val PrimaryGreen = Color(0xFF10B981)
+val PrimaryGreenDark = Color(0xFF34D399)
 val BackgroundLight = Color(0xFFF8FAFC)
 val SurfaceLight = Color(0xFFFFFFFF)
 val TextDark = Color(0xFF0F172A)

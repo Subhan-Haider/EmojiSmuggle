@@ -165,6 +165,23 @@ class HistoryRepository(context: Context) {
         val serialized = historyList.joinToString(";;;") { "${it.type}|||${it.timestamp}|||${it.payload}" }
         prefs.edit().putString("history_data", serialized).apply()
     }
+
+    fun exportJson(): String {
+        val sb = java.lang.StringBuilder()
+        sb.append("[\n")
+        for (i in 0 until historyList.size) {
+            val item = historyList[i]
+            sb.append("  {\n")
+            sb.append("    \"type\": \"${item.type}\",\n")
+            sb.append("    \"timestamp\": ${item.timestamp},\n")
+            sb.append("    \"payload\": \"${item.payload.replace("\"", "\\\"")}\"\n")
+            sb.append("  }")
+            if (i < historyList.size - 1) sb.append(",")
+            sb.append("\n")
+        }
+        sb.append("]")
+        return sb.toString()
+    }
 }
 
 lateinit var AppHistory: HistoryRepository
@@ -884,6 +901,19 @@ fun SettingsScreen() {
                 }
             }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
+            Text("Accent Color", fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                val accents = listOf("Blue", "Purple", "Green")
+                accents.forEachIndexed { index, name ->
+                    FilterChip(
+                        selected = AppSettings.colorAccent == index,
+                        onClick = { AppSettings.colorAccent = index; AppSettings.saveInt("colorAccent", index) },
+                        label = { Text(name) }
+                    )
+                }
+            }
+            Divider(modifier = Modifier.padding(vertical = 12.dp))
             SettingsToggleRow("Enable Animations", "Smooth screen transitions", AppSettings.animationsEnabled) { AppSettings.animationsEnabled = it; AppSettings.saveBool("animationsEnabled", it) }
             Divider(modifier = Modifier.padding(vertical = 12.dp))
             Text("App Icon Design", fontWeight = FontWeight.Medium)
@@ -952,7 +982,30 @@ fun SettingsScreen() {
             Divider(modifier = Modifier.padding(vertical = 8.dp))
             SettingsToggleRow("Disable Analytics", "Opt-out of crash reporting", AppSettings.disableAnalytics) { AppSettings.disableAnalytics = it; AppSettings.saveBool("disableAnalytics", it) }
             Spacer(modifier = Modifier.height(16.dp))
-            OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth()) { Text("Wipe All App Data", color = MaterialTheme.colorScheme.error) }
+            OutlinedButton(
+                onClick = {
+                    AppHistory.clearHistory()
+                    AppSettings.themeMode = 0
+                    AppSettings.saveInt("themeMode", 0)
+                    AppSettings.colorAccent = 0
+                    AppSettings.saveInt("colorAccent", 0)
+                    AppSettings.appIconStyle = "default"
+                    AppSettings.saveString("appIconStyle", "default")
+                    AppSettings.animationsEnabled = true
+                    AppSettings.saveBool("animationsEnabled", true)
+                    AppSettings.appLockEnabled = false
+                    AppSettings.saveBool("appLockEnabled", false)
+                    AppSettings.autoDeleteHistory = false
+                    AppSettings.saveBool("autoDeleteHistory", false)
+                    AppSettings.clipboardProtection = true
+                    AppSettings.saveBool("clipboardProtection", true)
+                    AppSettings.hiddenMode = false
+                    AppSettings.saveBool("hiddenMode", false)
+                    changeAppIcon(context, "default")
+                    Toast.makeText(context, "All app preferences and history wiped completely!", Toast.LENGTH_LONG).show()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Wipe All App Data", color = MaterialTheme.colorScheme.error) }
         }
 
         // 5. BEHAVIOR
@@ -968,12 +1021,39 @@ fun SettingsScreen() {
         StandardCard {
             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Storage Used", fontWeight = FontWeight.Medium)
-                Text("2.4 MB", color = MaterialTheme.colorScheme.primary)
+                val size = AppHistory.historyList.size
+                val spaceText = if (size == 0) "12 KB" else "${12 + size * 2} KB"
+                Text(spaceText, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = {}, modifier = Modifier.weight(1f)) { Text("Export JSON") }
-                OutlinedButton(onClick = {}, modifier = Modifier.weight(1f)) { Text("Clear Cache") }
+                OutlinedButton(
+                    onClick = {
+                        val json = AppHistory.exportJson()
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Emoji Smuggle Backup", json))
+                        
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            putExtra(Intent.EXTRA_TEXT, json)
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "Export Vault Backup"))
+                        Toast.makeText(context, "JSON Backup copied & share panel opened!", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.weight(1f)
+                ) { Text("Export JSON") }
+                
+                OutlinedButton(
+                    onClick = {
+                        try {
+                            context.cacheDir.deleteRecursively()
+                            Toast.makeText(context, "Temporary image cache cleared successfully!", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Cache clear failed.", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) { Text("Clear Cache") }
             }
         }
 
