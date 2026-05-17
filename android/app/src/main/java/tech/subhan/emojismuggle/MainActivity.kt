@@ -402,6 +402,7 @@ fun AppLogo(modifier: Modifier = Modifier) {
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
+    val context = LocalContext.current
     Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
 
         // 1. HEADER
@@ -499,8 +500,46 @@ fun HomeScreen(navController: NavHostController) {
                             "IMAGE" -> "Smuggled secret into image"
                             else -> "Scanned QR code payload"
                         }
-                        val preview = if (item.payload.length > 24) item.payload.take(24) + "…" else item.payload
-                        ActivityItem(icon, "$titleText ($preview)", getRelativeTime(item.timestamp))
+                        val preview = if (item.payload.startsWith("IMAGE_STAMP:")) {
+                            "Smuggled Image"
+                        } else {
+                            if (item.payload.length > 24) item.payload.take(24) + "…" else item.payload
+                        }
+                        ActivityItem(icon, "$titleText ($preview)", getRelativeTime(item.timestamp)) {
+                            if (AppSettings.hapticFeedback) {
+                                try {
+                                    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                                    if (android.os.Build.VERSION.SDK_INT >= 26) {
+                                        vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                                    } else {
+                                        @Suppress("DEPRECATION")
+                                        vibrator.vibrate(50)
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+
+                            if (item.payload.startsWith("IMAGE_STAMP:")) {
+                                val base64 = item.payload.removePrefix("IMAGE_STAMP:")
+                                try {
+                                    val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
+                                    val bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                                    if (bitmap != null) {
+                                        saveBitmapToGallery(context, bitmap)
+                                        Toast.makeText(context, "Image restored & saved to gallery! 📸", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to restore smuggled image.", Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Failed to restore smuggled image.", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("Decoded payload", item.payload))
+                                Toast.makeText(context, "Secret copied to clipboard! 📋", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                         if (index < recentItems.size - 1) {
                             Divider(modifier = Modifier.padding(vertical = 10.dp))
                         }
@@ -589,8 +628,14 @@ fun StatItem(value: String, label: String, icon: String = "") {
 }
 
 @Composable
-fun ActivityItem(icon: String, text: String, time: String) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+fun ActivityItem(icon: String, text: String, time: String, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically, 
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 6.dp)
+    ) {
         Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
             Text(icon, fontSize = 16.sp)
         }
@@ -598,7 +643,7 @@ fun ActivityItem(icon: String, text: String, time: String) {
             Text(text, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium, fontSize = 13.sp)
             Text(time, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 11.sp)
         }
-        Text("›", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), fontSize = 20.sp)
+        Text("›", color = MaterialTheme.colorScheme.primary, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 4.dp))
     }
 }
 
