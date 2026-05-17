@@ -215,6 +215,8 @@ fun saveBitmapToGallery(context: Context, bitmap: android.graphics.Bitmap) {
 
 // ---------------- MAIN ACTIVITY ----------------
 class MainActivity : ComponentActivity() {
+    private var navControllerInstance: NavHostController? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppSettings = SettingsRepository(applicationContext)
@@ -229,8 +231,27 @@ class MainActivity : ComponentActivity() {
             
             EmojiSmuggleTheme(darkTheme = isDark) {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    EmojiSmuggleMainScreen()
+                    EmojiSmuggleMainScreen(onNavControllerCreated = { controller ->
+                        navControllerInstance = controller
+                    })
                 }
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // When the user minimizes the app (presses home), reset to home page automatically!
+        runOnUiThread {
+            try {
+                navControllerInstance?.let { controller ->
+                    controller.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -238,8 +259,14 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmojiSmuggleMainScreen() {
+fun EmojiSmuggleMainScreen(onNavControllerCreated: (NavHostController) -> Unit) {
     val navController = rememberNavController()
+    
+    // Save controller instance
+    LaunchedEffect(navController) {
+        onNavControllerCreated(navController)
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
