@@ -1,0 +1,37 @@
+name: Publish SDK to NPM
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # CRITICAL: Required for OIDC Trusted Publisher passwordless exchange!
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install SDK Dependencies
+        run: |
+          cd emoji-smuggle
+          npm install --legacy-peer-deps
+
+      - name: Build SDK Bundle
+        run: |
+          cd emoji-smuggle
+          npm run build
+
+      - name: Publish Package to NPM
+        run: |
+          cd emoji-smuggle
+          npm publish --provenance --access public
