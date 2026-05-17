@@ -75,6 +75,9 @@ class SettingsRepository(context: Context) {
     var securityAlerts by mutableStateOf(prefs.getBoolean("securityAlerts", true))
     var emojiLimit by mutableStateOf(prefs.getInt("emojiLimit", 5))
 
+    var floatingOverlayEnabled by mutableStateOf(prefs.getBoolean("floatingOverlayEnabled", false))
+    var textSelectionActionsEnabled by mutableStateOf(prefs.getBoolean("textSelectionActionsEnabled", true))
+
     fun saveInt(key: String, value: Int) { prefs.edit().putInt(key, value).apply() }
     fun saveBool(key: String, value: Boolean) { prefs.edit().putBoolean(key, value).apply() }
     fun saveString(key: String, value: String) { prefs.edit().putString(key, value).apply() }
@@ -214,9 +217,12 @@ fun saveBitmapToGallery(context: Context, bitmap: android.graphics.Bitmap) {
     }
 }
 
+var activeClipboardTextPrompt by mutableStateOf("")
+
 // ---------------- MAIN ACTIVITY ----------------
 class MainActivity : ComponentActivity() {
     private var navControllerInstance: NavHostController? = null
+    private var lastHandledClipboardText = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -237,6 +243,29 @@ class MainActivity : ComponentActivity() {
                     })
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::AppSettings.isInitialized && AppSettings.clipboardAutoDetect) {
+            checkClipboard()
+        }
+    }
+
+    private fun checkClipboard() {
+        try {
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            if (clipboard.hasPrimaryClip()) {
+                val item = clipboard.primaryClip?.getItemAt(0)
+                val text = item?.text?.toString() ?: ""
+                if (text.isNotEmpty() && text != lastHandledClipboardText) {
+                    lastHandledClipboardText = text
+                    activeClipboardTextPrompt = text
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -318,6 +347,74 @@ fun EmojiSmuggleMainScreen(onNavControllerCreated: (NavHostController) -> Unit) 
             composable("settings") { SettingsScreen() }
             composable("image") { ImageSmugglingScreen() }
             composable("qr") { QRScanScreen() }
+        }
+        
+        if (activeClipboardTextPrompt.isNotEmpty()) {
+            val isStego = StegoEngine.containsStego(activeClipboardTextPrompt)
+            val previewText = if (activeClipboardTextPrompt.length > 80) activeClipboardTextPrompt.take(80) + "..." else activeClipboardTextPrompt
+            
+            AlertDialog(
+                onDismissRequest = { activeClipboardTextPrompt = "" },
+                title = {
+                    Text(
+                        text = if (isStego) "🕵️ Stego Payload Detected!" else "🛡️ Secure Copy Text?",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column {
+                        Text(
+                            text = if (isStego) {
+                                "The clipboard contains a hidden stego emoji payload. Do you want to decode it now?"
+                            } else {
+                                "Do you want to smuggle a secret message into emojis using your copied text?"
+                            },
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = previewText,
+                                modifier = Modifier.padding(12.dp),
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val textToProcess = activeClipboardTextPrompt
+                            activeClipboardTextPrompt = ""
+                            if (isStego) {
+                                navController.navigate("decode") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            } else {
+                                navController.navigate("encode") {
+                                    popUpTo("home") { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        }
+                    ) {
+                        Text(if (isStego) "Decode Now" else "Encode Now")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { activeClipboardTextPrompt = "" }) {
+                        Text("Ignore")
+                    }
+                },
+                shape = RoundedCornerShape(20.dp)
+            )
         }
     }
 }
@@ -1298,7 +1395,54 @@ fun SettingsScreen() {
             )
         }
 
-        // 4. PRIVACY
+        // 4. SYSTEM INTEGRATION
+        SectionHeader("System Integration")
+        StandardCard {
+            SettingsToggleRow("Clipboard Auto-Detect", "Prompt to encode or decode when opening app", AppSettings.clipboardAutoDetect) {
+                AppSettings.clipboardAutoDetect = it
+                AppSettings.saveBool("clipboardAutoDetect", it)
+            }
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            SettingsToggleRow("Text Selection Menu Action", "Show Encode/Decode when highlighting text", AppSettings.textSelectionActionsEnabled) {
+                AppSettings.textSelectionActionsEnabled = it
+                AppSettings.saveBool("textSelectionActionsEnabled", it)
+                
+                val pm = context.packageManager
+                val encodeComponent = ComponentName(context, "tech.subhan.emojismuggle.ProcessTextActivity")
+                val decodeComponent = ComponentName(context, "tech.subhan.emojismuggle.ProcessTextDecodeActivity")
+                val newState = if (it) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                try {
+                    pm.setComponentEnabledSetting(encodeComponent, newState, PackageManager.DONT_KILL_APP)
+                    pm.setComponentEnabledSetting(decodeComponent, newState, PackageManager.DONT_KILL_APP)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            SettingsToggleRow("Floating Quick Action Bubble", "Overlay bubble for quick background actions", AppSettings.floatingOverlayEnabled) {
+                AppSettings.floatingOverlayEnabled = it
+                AppSettings.saveBool("floatingOverlayEnabled", it)
+                
+                if (it) {
+                    if (android.os.Build.VERSION.SDK_INT >= 23 && !android.provider.Settings.canDrawOverlays(context)) {
+                        val intent = Intent(
+                            android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:${context.packageName}")
+                        )
+                        context.startActivity(intent)
+                        Toast.makeText(context, "Please allow 'Display over other apps' permission!", Toast.LENGTH_LONG).show()
+                    } else {
+                        val serviceIntent = Intent(context, FloatingBubbleService::class.java)
+                        context.startService(serviceIntent)
+                    }
+                } else {
+                    val serviceIntent = Intent(context, FloatingBubbleService::class.java)
+                    context.stopService(serviceIntent)
+                }
+            }
+        }
+
+        // 5. PRIVACY
         SectionHeader("Privacy")
         StandardCard {
             SettingsToggleRow("Offline Mode", "Force local processing only", AppSettings.offlineMode) { AppSettings.offlineMode = it; AppSettings.saveBool("offlineMode", it) }
@@ -1324,6 +1468,10 @@ fun SettingsScreen() {
                     AppSettings.saveBool("clipboardProtection", true)
                     AppSettings.hiddenMode = false
                     AppSettings.saveBool("hiddenMode", false)
+                    AppSettings.floatingOverlayEnabled = false
+                    AppSettings.saveBool("floatingOverlayEnabled", false)
+                    AppSettings.textSelectionActionsEnabled = true
+                    AppSettings.saveBool("textSelectionActionsEnabled", true)
                     changeAppIcon(context, "default")
                     Toast.makeText(context, "All app preferences and history wiped completely!", Toast.LENGTH_LONG).show()
                 },

@@ -78,4 +78,8 @@ object StegoEngine {
             "ERROR: Decoding failed."
         }
     }
+
+    fun containsStego(encoded: String): Boolean {
+        return encoded.any { it == BIT_0 || it == BIT_1 }
+    }
 }
