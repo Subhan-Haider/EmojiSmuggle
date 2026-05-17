@@ -1,19 +1,19 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/EmojiSmuggle/emoji-smuggle/main/assets/logo.png" width="120" alt="Emoji Smuggle Logo" />
-  <h1>emoji-smuggle</h1>
+  <img src="https://raw.githubusercontent.com/Subhan-Haider/EmojiSmuggle/main/public/logo.svg" width="130" alt="Emoji Smuggle Logo" />
+  <h1>emoji-smuggle-sdk</h1>
   <p><strong>Hide private data inside innocent-looking emoji strings using Unicode steganography.</strong></p>
   
   <p>
-    <a href="https://www.npmjs.com/package/emoji-smuggle"><img src="https://img.shields.io/npm/v/emoji-smuggle" alt="NPM Version" /></a>
+    <a href="https://www.npmjs.com/package/emoji-smuggle-sdk"><img src="https://img.shields.io/npm/v/emoji-smuggle-sdk?color=00FF41&style=flat-square" alt="NPM Version" /></a>
     <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square" alt="License: Apache 2.0" /></a>
-    <a href="https://bundlephobia.com/package/emoji-smuggle"><img src="https://img.shields.io/bundlephobia/minzip/emoji-smuggle" alt="Bundle Size" /></a>
+    <a href="https://bundlephobia.com/package/emoji-smuggle-sdk"><img src="https://img.shields.io/bundlephobia/minzip/emoji-smuggle-sdk?style=flat-square" alt="Bundle Size" /></a>
   </p>
 </div>
 
 ---
 
 ## What is this?
-**emoji-smuggle** is a lightweight, zero-dependency (well, almost!) JavaScript SDK for hiding secret text messages inside completely normal-looking strings of emojis. 
+**emoji-smuggle-sdk** is a lightweight, zero-dependency JavaScript SDK for hiding secret text messages inside completely normal-looking strings of emojis. 
 
 It works by taking your text, compressing it, converting it to binary, and then representing that binary as invisible Zero-Width Unicode characters. These invisible characters are then safely tucked in between random (or chosen) emojis.
 
@@ -21,7 +21,7 @@ To the naked eye, the output is just a string of emojis (`😂🔥🎉😎⚡`).
 
 ## Features
 - **Steganography:** 100% invisible payload hiding using ZWJ/ZWNJ characters.
-- **Auto-Compression:** Built-in `pako` deflation shrinks your data footprint.
+- **Auto-Compression:** Built-in zlib deflate compression shrinks your data footprint.
 - **AES Encryption:** Built-in support for password-protected payloads.
 - **Universal:** Works flawlessly in Node.js, browsers, and edge environments.
 - **Type-Safe:** Ships with complete TypeScript definitions.
@@ -29,12 +29,12 @@ To the naked eye, the output is just a string of emojis (`😂🔥🎉😎⚡`).
 ## Installation
 
 ```bash
-npm install emoji-smuggle
+npm install emoji-smuggle-sdk
 ```
 or using Yarn / pnpm:
 ```bash
-yarn add emoji-smuggle
-pnpm add emoji-smuggle
+yarn add emoji-smuggle-sdk
+pnpm add emoji-smuggle-sdk
 ```
 
 ---
@@ -44,7 +44,7 @@ pnpm add emoji-smuggle
 ### Basic Encoding & Decoding
 
 ```javascript
-import { encodeMessage, decodeMessage } from 'emoji-smuggle';
+import { encodeMessage, decodeMessage } from 'emoji-smuggle-sdk';
 
 // 1. Encode your secret message
 const secretPayload = "Meet me at the secure location at midnight.";
@@ -65,17 +65,17 @@ console.log(decodedText);
 You can encrypt your message with AES-256 before hiding it in emojis:
 
 ```javascript
-import { encodeWithPassword, decodeWithPassword } from 'emoji-smuggle';
+import { encodeMessage, decodeMessage } from 'emoji-smuggle-sdk';
 
 const secret = "Top Secret Intel";
 const password = "super_strong_password_123";
 
 // Encode with a password
-const encoded = encodeWithPassword(secret, password);
+const encoded = encodeMessage(secret, { password: password });
 
 // Decode requiring the exact password
 try {
-  const result = decodeWithPassword(encoded, password);
+  const result = decodeMessage(encoded, { password: password });
   console.log(result); // "Top Secret Intel"
 } catch (error) {
   console.error("Failed to decode: Invalid password or corrupted data");
@@ -87,7 +87,7 @@ try {
 By default, the SDK uses a random preset of popular emojis. You can specify a different preset, or provide your own array of emojis to act as the "carrier":
 
 ```javascript
-import { encodeMessage } from 'emoji-smuggle';
+import { encodeMessage } from 'emoji-smuggle-sdk';
 
 // Use a built-in preset ('cyberpunk', 'ghost', 'nature', 'random')
 const cyberEncode = encodeMessage("Wake up, Samurai", { carrier: 'cyberpunk' });
@@ -138,8 +138,8 @@ When the string is rendered in Discord, WhatsApp, Twitter, or a browser, the tex
 
 ## Performance Notes
 - Hiding data in Unicode characters is extremely robust but inflates the byte-size of your message. One byte of ASCII text takes 8 bits -> 8 Zero-Width characters -> roughly 24 bytes of UTF-8 data. 
-- Because of this 24x size inflation, `emoji-smuggle` automatically runs `pako` deflate compression on your payload before hiding it, significantly mitigating the size cost. 
+- Because of this 24x size inflation, `emoji-smuggle-sdk` automatically runs deflate compression on your payload before hiding it, significantly mitigating the size cost. 
 - For massive payloads (e.g., trying to hide megabytes of data), browser memory limits on string manipulation may become a bottleneck.
 
 ## License
-MIT © EmojiSmuggle
+Apache 2.0 License © EmojiSmuggle
