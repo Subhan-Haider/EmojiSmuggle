@@ -392,7 +392,16 @@ fun ImageSmugglingScreen() {
                     var bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                     if (bitmap != null) {
                         // Downscale dynamically to prevent memory issues and huge emoji strings
-                        val maxDimension = 120
+                        val maxDimension = when {
+                            AppSettings.emojiLimit <= 5 -> 120
+                            AppSettings.emojiLimit <= 12 -> 240
+                            else -> 480
+                        }
+                        val quality = when {
+                            AppSettings.emojiLimit <= 5 -> 50
+                            AppSettings.emojiLimit <= 12 -> 75
+                            else -> 90
+                        }
                         if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
                             val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
                             val newWidth = if (bitmap.width > bitmap.height) maxDimension else (maxDimension * ratio).toInt()
@@ -401,12 +410,11 @@ fun ImageSmugglingScreen() {
                         }
                         
                         val outputStream = java.io.ByteArrayOutputStream()
-                        val quality = (compressionLevel * 100).toInt().coerceIn(1, 100)
                         bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, outputStream)
                         val bytes = outputStream.toByteArray()
                         val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
                         
-                        resultEmoji = StegoEngine.smuggle("IMAGE_STAMP:" + base64, passToUse)
+                        resultEmoji = StegoEngine.smuggle("IMAGE_STAMP:" + base64, passToUse, carrierCount = AppSettings.emojiLimit)
                         if (resultEmoji.isNotEmpty()) {
                             AppHistory.addEntry("IMAGE", "Converted Image (${bytes.size / 1024} KB)")
                         }

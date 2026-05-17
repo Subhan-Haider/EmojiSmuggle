@@ -15,7 +15,7 @@ object StegoEngine {
         "🏕️", "🏜️", "🏝️", "🎡", "🎢", "🛫", "🤖", "🎭", "🎪", "🎫", "🏆", "🏅", "🎲"
     )
 
-    fun smuggle(message: String, password: String? = null): String {
+    fun smuggle(message: String, password: String? = null, carrierCount: Int? = null): String {
         val payload = CryptoEngine.encrypt(message, password)
         val bytes = payload.toByteArray(Charsets.UTF_8)
         
@@ -34,8 +34,8 @@ object StegoEngine {
         val invisiblePayload = zwBuilder.toString()
         
         val isImage = message.startsWith("IMAGE_STAMP:")
-        val count = if (isImage) (3..5).random() else (2..4).random()
-        val carriers = CARRIER_POOL.shuffled().take(count)
+        val count = carrierCount ?: if (isImage) (3..5).random() else (2..4).random()
+        val carriers = CARRIER_POOL.shuffled().take(count.coerceIn(2, CARRIER_POOL.size))
         
         val result = StringBuilder()
         result.append(carriers[0])

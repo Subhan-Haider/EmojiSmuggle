@@ -73,6 +73,7 @@ class SettingsRepository(context: Context) {
 
     var enableNotifications by mutableStateOf(prefs.getBoolean("enableNotifications", true))
     var securityAlerts by mutableStateOf(prefs.getBoolean("securityAlerts", true))
+    var emojiLimit by mutableStateOf(prefs.getInt("emojiLimit", 5))
 
     fun saveInt(key: String, value: Int) { prefs.edit().putInt(key, value).apply() }
     fun saveBool(key: String, value: Boolean) { prefs.edit().putBoolean(key, value).apply() }
@@ -633,7 +634,16 @@ fun EncodeScreen() {
                 var bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                 if (bitmap != null) {
                     // Downscale dynamically to prevent memory issues and huge emoji strings
-                    val maxDimension = 120
+                    val maxDimension = when {
+                        AppSettings.emojiLimit <= 5 -> 120
+                        AppSettings.emojiLimit <= 12 -> 240
+                        else -> 480
+                    }
+                    val quality = when {
+                        AppSettings.emojiLimit <= 5 -> 50
+                        AppSettings.emojiLimit <= 12 -> 75
+                        else -> 90
+                    }
                     if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
                         val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
                         val newWidth = if (bitmap.width > bitmap.height) maxDimension else (maxDimension * ratio).toInt()
@@ -642,11 +652,11 @@ fun EncodeScreen() {
                     }
                     
                     val outputStream = java.io.ByteArrayOutputStream()
-                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, outputStream)
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, outputStream)
                     val bytes = outputStream.toByteArray()
                     val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
                     
-                    result = StegoEngine.smuggle("IMAGE_STAMP:" + base64, password)
+                    result = StegoEngine.smuggle("IMAGE_STAMP:" + base64, password, carrierCount = AppSettings.emojiLimit)
                     if (result.isNotEmpty()) {
                         AppHistory.addEntry("IMAGE", "Converted Image (${bytes.size / 1024} KB)")
                     }
@@ -1179,6 +1189,29 @@ fun SettingsScreen() {
             SettingsToggleRow("Require Password", "Force AES encryption on all messages", AppSettings.requirePassword) { AppSettings.requirePassword = it; AppSettings.saveBool("requirePassword", it) }
             Divider(modifier = Modifier.padding(vertical = 8.dp))
             SettingsToggleRow("Auto-compress Media", "Shrink images before encoding", AppSettings.autoCompress) { AppSettings.autoCompress = it; AppSettings.saveBool("autoCompress", it) }
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("Carrier Emoji Limit & Quality", fontWeight = FontWeight.Medium)
+                Text("${AppSettings.emojiLimit} Emojis", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            }
+            Slider(
+                value = AppSettings.emojiLimit.toFloat(), 
+                onValueChange = { AppSettings.emojiLimit = it.toInt(); AppSettings.saveInt("emojiLimit", it.toInt()) }, 
+                valueRange = 3f..20f, 
+                steps = 16
+            )
+            val qualityLabel = when {
+                AppSettings.emojiLimit <= 5 -> "Compact: Images scaled to 120px, 50% Quality (Highest chat app compatibility)"
+                AppSettings.emojiLimit <= 12 -> "Balanced: Images scaled to 240px, 75% Quality (Ideal for messaging)"
+                else -> "Ultra High: Images scaled to 480px, 90% Quality (Excellent image clarity)"
+            }
+            Text(
+                text = qualityLabel, 
+                fontSize = 12.sp, 
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         // 4. PRIVACY
