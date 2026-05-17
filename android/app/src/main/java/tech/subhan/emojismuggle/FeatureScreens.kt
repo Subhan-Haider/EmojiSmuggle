@@ -430,7 +430,7 @@ fun ImageSmugglingScreen() {
                     Text("Your secure emoji stream (copy & share this):", fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.padding(bottom = 8.dp))
-                    Text(resultEmoji, fontSize = 22.sp, modifier = Modifier.padding(bottom = 16.dp))
+                    Text(resultEmoji.filter { it != '\u200C' && it != '\u200D' }, fontSize = 22.sp, modifier = Modifier.padding(bottom = 16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = {
                             val cb = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

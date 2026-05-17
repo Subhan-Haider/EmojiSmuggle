@@ -742,7 +742,7 @@ fun EncodeScreen() {
                 Spacer(modifier = Modifier.height(24.dp))
                 StandardCard {
                     Text("Result", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                    Text(result, fontSize = 20.sp, modifier = Modifier.padding(vertical = 16.dp))
+                    Text(result.filter { it != '\u200C' && it != '\u200D' }, fontSize = 20.sp, modifier = Modifier.padding(vertical = 16.dp))
                     
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = {
