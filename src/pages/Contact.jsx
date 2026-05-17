@@ -46,18 +46,13 @@ const Contact = () => {
             <div className="space-y-4">
               <a 
                 href="mailto:support@subhan.tech" 
-                className="block p-4 bg-white/5 border border-white/5 hover:border-cyber-green/40 hover:bg-cyber-green/5 rounded-2xl text-slate-350 hover:text-white transition-all group"
+                className="block p-5 bg-white/5 border border-white/5 hover:border-cyber-green/40 hover:bg-cyber-green/5 rounded-2xl text-slate-350 hover:text-white transition-all group"
               >
-                <span className="text-slate-500 block mb-1 text-[10px] uppercase font-bold tracking-widest">Secure Support / Bugs</span>
-                <span className="font-mono text-sm">support@subhan.tech</span>
-              </a>
-              
-              <a 
-                href="mailto:hello@emoji.subhan.tech" 
-                className="block p-4 bg-white/5 border border-white/5 hover:border-cyber-purple/40 hover:bg-cyber-purple/5 rounded-2xl text-slate-350 hover:text-white transition-all group"
-              >
-                <span className="text-slate-500 block mb-1 text-[10px] uppercase font-bold tracking-widest">General Enquiries / PR</span>
-                <span className="font-mono text-sm">hello@emoji.subhan.tech</span>
+                <span className="text-slate-500 block mb-2 text-[10px] uppercase font-bold tracking-widest">Global Communications Node</span>
+                <span className="font-mono text-base text-transparent bg-clip-text bg-gradient-to-r from-cyber-green to-cyber-purple font-black">support@subhan.tech</span>
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed font-sans group-hover:text-slate-400 transition-colors">
+                  Submit stego bug reports, developer API integrations, Android package inquiries, or partnership opportunities.
+                </p>
               </a>
             </div>
           </div>
