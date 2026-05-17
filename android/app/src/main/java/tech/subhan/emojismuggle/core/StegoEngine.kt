@@ -4,6 +4,17 @@ object StegoEngine {
     private const val BIT_1 = '\u200D' // ZWJ
     private const val BIT_0 = '\u200C' // ZWNJ
 
+    private val CARRIER_POOL = listOf(
+        "🕵️", "💬", "🔒", "⚡", "📦", "💾", "💻", "🔑", "🛡️", "🔮", "🖼️", "🔌", "🦾", "🥽", "🌃",
+        "😀", "😎", "👾", "👻", "🦄", "🐼", "🦊", "🍕", "🎮", "🚀", "🎈", "🎉", "🔥", "🌈", "☀️",
+        "🌊", "⭐", "🍀", "🚗", "🛸", "🌍", "🪐", "🌟", "✨", "💎", "🎯", "🎨", "🎤", "🎧", "🎬",
+        "🧩", "🧪", "🧬", "📡", "🔋", "💡", "🧠", "🦖", "🐉", "🐾", "🦂", "🦁", "🐯", "🐱", "🐶",
+        "🐻", "🐨", "🐸", "🐙", "🦑", "🦐", "🐠", "🐬", "🐳", "🐊", "🦍", "🐘", "🦅", "🦉",
+        "🧁", "🍩", "🍪", "🍫", "🍯", "🍔", "🍟", "🌮", "🍣", "🍜", "🍞", "🧀", "🍦", "🍎", "🍓",
+        "🍒", "🍍", "🥑", "🌶️", "🍄", "🌴", "🌵", "🍁", "🌸", "🧿", "⚙️", "🧭", "🌋",
+        "🏕️", "🏜️", "🏝️", "🎡", "🎢", "🛫", "🤖", "🎭", "🎪", "🎫", "🏆", "🏅", "🎲"
+    )
+
     fun smuggle(message: String, password: String? = null): String {
         val payload = CryptoEngine.encrypt(message, password)
         val bytes = payload.toByteArray(Charsets.UTF_8)
@@ -23,14 +34,8 @@ object StegoEngine {
         val invisiblePayload = zwBuilder.toString()
         
         val isImage = message.startsWith("IMAGE_STAMP:")
-        val emojiPool = if (isImage) {
-            listOf("🕵️", "🖼️", "⚡", "🔮", "💾", "🔌", "💻", "🦾", "🥽", "🌃")
-        } else {
-            listOf("🕵️", "💬", "🔒", "⚡", "📦", "💾", "💻", "🔑", "🛡️", "🔮")
-        }
-        
         val count = if (isImage) (3..5).random() else (2..4).random()
-        val carriers = emojiPool.shuffled().take(count)
+        val carriers = CARRIER_POOL.shuffled().take(count)
         
         val result = StringBuilder()
         result.append(carriers[0])
