@@ -1004,6 +1004,7 @@ fun DecodeScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen() {
+    val context = LocalContext.current
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf(0) } // 0=All, 1=Encoded, 2=Decoded
 
@@ -1082,8 +1083,46 @@ fun HistoryScreen() {
                                 }
                                 Text(getRelativeTime(item.timestamp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontSize = 11.sp)
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(item.payload, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            if (item.payload.startsWith("IMAGE_STAMP:")) {
+                                val base64 = item.payload.removePrefix("IMAGE_STAMP:")
+                                val bitmap = remember(item.payload) {
+                                    try {
+                                        val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
+                                        android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                                    } catch (e: Exception) {
+                                        null
+                                    }
+                                }
+                                if (bitmap != null) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                        androidx.compose.foundation.Image(
+                                            bitmap = bitmap.asImageBitmap(),
+                                            contentDescription = "Smuggled Image Preview",
+                                            modifier = Modifier
+                                                .size(60.dp)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                        )
+                                        Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
+                                            Text("Smuggled Image", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                            Text("${base64.length / 1024} KB payload", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                                        }
+                                        IconButton(onClick = {
+                                            saveBitmapToGallery(context, bitmap)
+                                            Toast.makeText(context, "Image saved to gallery successfully!", Toast.LENGTH_SHORT).show()
+                                        }) {
+                                            Text("💾", fontSize = 20.sp)
+                                        }
+                                    }
+                                } else {
+                                    Text("🖼️ Smuggled Image Payload", fontStyle = androidx.compose.ui.text.font.FontStyle.Italic, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                                }
+                            } else {
+                                Text(item.payload, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
+                            }
                         }
                     }
                 }
