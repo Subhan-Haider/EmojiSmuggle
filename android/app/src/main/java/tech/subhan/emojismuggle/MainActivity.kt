@@ -1251,6 +1251,7 @@ fun SettingsScreen() {
             Text("A premium offline steganography platform designed with Material 3 principles.", fontSize = 14.sp)
             Spacer(modifier = Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://emoji.subhan.tech/privacy"))) }, modifier = Modifier.weight(1f)) { Text("Privacy") }
                 Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://emoji.subhan.tech"))) }, modifier = Modifier.weight(1f)) { Text("Website") }
                 Button(onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Subhan-Haider"))) }, modifier = Modifier.weight(1f)) { Text("GitHub") }
             }
