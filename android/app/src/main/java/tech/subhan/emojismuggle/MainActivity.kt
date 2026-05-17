@@ -597,6 +597,52 @@ fun EncodeScreen() {
     var result by remember { mutableStateOf("") }
     val context = LocalContext.current
 
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        if (uri != null) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                var bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                if (bitmap != null) {
+                    // Downscale dynamically to prevent memory issues and huge emoji strings
+                    val maxDimension = 320
+                    if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
+                        val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
+                        val newWidth = if (bitmap.width > bitmap.height) maxDimension else (maxDimension * ratio).toInt()
+                        val newHeight = if (bitmap.height > bitmap.width) maxDimension else (maxDimension / ratio).toInt()
+                        bitmap = android.graphics.Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+                    }
+                    
+                    val outputStream = java.io.ByteArrayOutputStream()
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, outputStream)
+                    val bytes = outputStream.toByteArray()
+                    val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                    
+                    result = StegoEngine.smuggle("IMAGE_STAMP:" + base64, password)
+                    if (result.isNotEmpty()) {
+                        AppHistory.addEntry("IMAGE", "Converted Image (${bytes.size / 1024} KB)")
+                    }
+                    Toast.makeText(context, "Image successfully transformed to emojis!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Failed to parse image bitmap.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(context, "Encoding error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            imagePicker.launch("image/*")
+        } else {
+            Toast.makeText(context, "Storage permission required to pick images", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text("Encode Message", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 16.dp))
 
@@ -623,10 +669,46 @@ fun EncodeScreen() {
                     if (result.isNotEmpty()) {
                         AppHistory.addEntry("ENCODE", text)
                     }
+                } else {
+                    Toast.makeText(context, "Please enter a secret message or select an image below", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(12.dp)
-        ) { Text("Encode", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+        ) { Text("Encode Text", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("🖼️ Image to Emoji Smuggle", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
+                Text("Transform an entire photo directly into a secure stego emoji stream.", 
+                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f), 
+                     fontSize = 12.sp, 
+                     modifier = Modifier.padding(vertical = 8.dp),
+                     textAlign = TextAlign.Center)
+                
+                Button(
+                    onClick = {
+                        val perm = if (android.os.Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES
+                                   else Manifest.permission.READ_EXTERNAL_STORAGE
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED) {
+                            imagePicker.launch("image/*")
+                        } else {
+                            permissionLauncher.launch(perm)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Select Image to Convert", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
 
         AnimatedVisibility(visible = result.isNotEmpty(), enter = fadeIn() + expandVertically()) {
             Column {
