@@ -20,6 +20,7 @@ import Legal from './pages/Legal';
 import ImageEncoder from './pages/ImageEncoder';
 import ImageDecoder from './pages/ImageDecoder';
 import Developers from './pages/Developers';
+import Contact from './pages/Contact';
 import { useApp } from './context/AppContext';
 
 const App = () => {
@@ -102,6 +103,7 @@ const App = () => {
               <Route path="/developers" element={<PageWrapper><Developers /></PageWrapper>} />
               <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
               <Route path="/settings" element={<PageWrapper><Settings /></PageWrapper>} />
+              <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
               <Route path="/privacy" element={<PageWrapper><Legal type="privacy" /></PageWrapper>} />
               <Route path="/terms" element={<PageWrapper><Legal type="terms" /></PageWrapper>} />
             </Routes>
@@ -153,6 +155,7 @@ const SiteFooter = () => {
       links: [
         { label: 'About', to: '/about' },
         { label: 'Protocol docs', to: '/about' },
+        { label: 'Contact Us', to: '/contact' },
         { label: 'Privacy Policy', to: '/privacy' },
         { label: 'Terms & Conditions', to: '/terms' },
       ],
