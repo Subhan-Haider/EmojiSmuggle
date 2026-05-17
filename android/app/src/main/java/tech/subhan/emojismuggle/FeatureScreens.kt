@@ -404,7 +404,7 @@ fun ImageSmugglingScreen() {
                         val quality = (compressionLevel * 100).toInt().coerceIn(1, 100)
                         bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, outputStream)
                         val bytes = outputStream.toByteArray()
-                        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
                         
                         resultEmoji = StegoEngine.smuggle("IMAGE_STAMP:" + base64, passToUse)
                         if (resultEmoji.isNotEmpty()) {

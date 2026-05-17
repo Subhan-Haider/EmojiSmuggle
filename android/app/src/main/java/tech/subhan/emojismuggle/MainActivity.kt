@@ -644,7 +644,7 @@ fun EncodeScreen() {
                     val outputStream = java.io.ByteArrayOutputStream()
                     bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, outputStream)
                     val bytes = outputStream.toByteArray()
-                    val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                    val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
                     
                     result = StegoEngine.smuggle("IMAGE_STAMP:" + base64, password)
                     if (result.isNotEmpty()) {
@@ -954,7 +954,18 @@ fun DecodeScreen() {
                         }
                     } else {
                         Text(if(isError) "Error" else "Decoded Message", color = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                        Text(decodedText, fontSize = 18.sp, modifier = Modifier.padding(vertical = 16.dp))
+                        Text(decodedText.trim(), fontSize = 18.sp, modifier = Modifier.padding(vertical = 8.dp))
+                        
+                        if (!isError) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedButton(onClick = {
+                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                    clipboard.setPrimaryClip(ClipData.newPlainText("Decoded Message", decodedText.trim()))
+                                    Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show()
+                                }, modifier = Modifier.weight(1f)) { Text("Copy Decoded Text") }
+                            }
+                        }
                     }
                 }
             }
