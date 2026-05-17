@@ -14,6 +14,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import androidx.compose.animation.*
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -185,6 +186,32 @@ class HistoryRepository(context: Context) {
 }
 
 lateinit var AppHistory: HistoryRepository
+
+fun saveBitmapToGallery(context: Context, bitmap: android.graphics.Bitmap) {
+    try {
+        val resolver = context.contentResolver
+        val contentValues = android.content.ContentValues().apply {
+            put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, "Smuggled_Restored_${System.currentTimeMillis()}.jpg")
+            put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                put(android.provider.MediaStore.Images.Media.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/EmojiSmuggle")
+            }
+        }
+        val uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        if (uri != null) {
+            val outStream = resolver.openOutputStream(uri)
+            if (outStream != null) {
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, outStream)
+                outStream.close()
+                Toast.makeText(context, "Image successfully saved to Gallery!", Toast.LENGTH_SHORT).show()
+                return
+            }
+        }
+        Toast.makeText(context, "Failed to save image.", Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Toast.makeText(context, "Save error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+    }
+}
 
 // ---------------- MAIN ACTIVITY ----------------
 class MainActivity : ComponentActivity() {
@@ -777,8 +804,49 @@ fun DecodeScreen() {
                 Spacer(modifier = Modifier.height(24.dp))
                 StandardCard {
                     val isError = decodedText.startsWith("ERROR")
-                    Text(if(isError) "Error" else "Decoded Message", color = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                    Text(decodedText, fontSize = 18.sp, modifier = Modifier.padding(vertical = 16.dp))
+                    val isImage = decodedText.startsWith("IMAGE_STAMP:")
+                    
+                    if (isImage) {
+                        Text("Reconstructed Stego Image", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        var restoredBitmap by remember(decodedText) {
+                            mutableStateOf<android.graphics.Bitmap?>(null)
+                        }
+                        
+                        LaunchedEffect(decodedText) {
+                            try {
+                                val base64Data = decodedText.substring("IMAGE_STAMP:".length)
+                                val decodedBytes = android.util.Base64.decode(base64Data, android.util.Base64.DEFAULT)
+                                restoredBitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        }
+                        
+                        if (restoredBitmap != null) {
+                            androidx.compose.foundation.Image(
+                                bitmap = restoredBitmap!!.asImageBitmap(),
+                                contentDescription = "Restored secret image",
+                                modifier = Modifier.fillMaxWidth().height(260.dp).clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.05f))
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    saveBitmapToGallery(context, restoredBitmap!!)
+                                },
+                                modifier = Modifier.fillMaxWidth().height(48.dp),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text("Save Image to Gallery", fontWeight = FontWeight.Bold)
+                            }
+                        } else {
+                            Text("ERROR: Reconstructing image failed.", color = MaterialTheme.colorScheme.error)
+                        }
+                    } else {
+                        Text(if(isError) "Error" else "Decoded Message", color = if(isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text(decodedText, fontSize = 18.sp, modifier = Modifier.padding(vertical = 16.dp))
+                    }
                 }
             }
         }

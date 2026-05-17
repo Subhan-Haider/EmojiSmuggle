@@ -236,8 +236,9 @@ fun ImageSmugglingScreen() {
     var secretText by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var resultEmoji by remember { mutableStateOf("") }
-    var compressionLevel by remember { mutableStateOf(0.8f) }
+    var compressionLevel by remember { mutableStateOf(0.6f) } // Default to 60% for optimal length
     var encryptionEnabled by remember { mutableStateOf(true) }
+    var smuggleMode by remember { mutableStateOf(1) } // Default to 1 (Image to Emoji) as requested!
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -261,9 +262,36 @@ fun ImageSmugglingScreen() {
     Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text("Image Smuggle", fontSize = 24.sp, fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 4.dp))
-        Text("Hide a secret message inside an emoji carrier derived from an image.",
+        Text("Transform entire images into secure emoji streams or hide secret messages inside image vectors.",
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f), fontSize = 13.sp,
             modifier = Modifier.padding(bottom = 20.dp))
+
+        // smuggle mode tabs
+        Row(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+            Button(
+                onClick = { smuggleMode = 1 },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (smuggleMode == 1) MaterialTheme.colorScheme.primary 
+                                     else MaterialTheme.colorScheme.surfaceVariant
+                ),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Image to Emoji", color = if (smuggleMode == 1) Color.White else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { smuggleMode = 0 },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (smuggleMode == 0) MaterialTheme.colorScheme.primary 
+                                     else MaterialTheme.colorScheme.surfaceVariant
+                ),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Hide Text", color = if (smuggleMode == 0) Color.White else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+            }
+        }
 
         // 1. IMAGE PICKER
         SectionHeader("Select Image")
@@ -303,23 +331,26 @@ fun ImageSmugglingScreen() {
             }
         }
 
-        // 2. SECRET MESSAGE
-        SectionHeader("Secret Payload")
-        StandardCard {
-            OutlinedTextField(value = secretText, onValueChange = { secretText = it },
-                label = { Text("Secret text to hide in emoji") },
-                modifier = Modifier.fillMaxWidth().height(100.dp), shape = RoundedCornerShape(8.dp))
-            Text("${secretText.length} chars", fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+        // 2. SECRET MESSAGE (if in text mode)
+        if (smuggleMode == 0) {
+            SectionHeader("Secret Payload")
+            StandardCard {
+                OutlinedTextField(value = secretText, onValueChange = { secretText = it },
+                    label = { Text("Secret text to hide in emoji") },
+                    modifier = Modifier.fillMaxWidth().height(100.dp), shape = RoundedCornerShape(8.dp))
+                Text("${secretText.length} chars", fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+            }
         }
 
         // 3. SETTINGS
         SectionHeader("Options")
         StandardCard {
-            Text("Compression: ${(compressionLevel * 100).toInt()}%", fontWeight = FontWeight.Medium)
+            Text("Compression Quality: ${(compressionLevel * 100).toInt()}%", fontWeight = FontWeight.Medium)
             Slider(value = compressionLevel, onValueChange = { compressionLevel = it },
                 modifier = Modifier.fillMaxWidth())
+            Text("💡 Lower quality yields smaller, easier-to-share emoji strings.", fontSize = 11.sp, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 4.dp))
             Divider(modifier = Modifier.padding(vertical = 12.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
@@ -339,18 +370,47 @@ fun ImageSmugglingScreen() {
         // 4. ENCODE BUTTON
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = {
-            if (secretText.isEmpty()) {
-                Toast.makeText(context, "Please enter a secret message", Toast.LENGTH_SHORT).show()
+            if (selectedImageUri == null) {
+                Toast.makeText(context, "Please select an image first", Toast.LENGTH_SHORT).show()
                 return@Button
             }
             val passToUse = if (encryptionEnabled) password else ""
-            resultEmoji = StegoEngine.smuggle(secretText, passToUse)
-            if (resultEmoji.isNotEmpty()) {
-                AppHistory.addEntry("IMAGE", secretText)
+            
+            if (smuggleMode == 0) {
+                if (secretText.isEmpty()) {
+                    Toast.makeText(context, "Please enter a secret message", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                resultEmoji = StegoEngine.smuggle(secretText, passToUse)
+                if (resultEmoji.isNotEmpty()) {
+                    AppHistory.addEntry("IMAGE", "Smuggled secret text")
+                }
+                Toast.makeText(context, "Text encoded successfully!", Toast.LENGTH_SHORT).show()
+            } else {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(selectedImageUri!!)
+                    val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                    if (bitmap != null) {
+                        val outputStream = java.io.ByteArrayOutputStream()
+                        val quality = (compressionLevel * 100).toInt().coerceIn(1, 100)
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, outputStream)
+                        val bytes = outputStream.toByteArray()
+                        val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT)
+                        
+                        resultEmoji = StegoEngine.smuggle("IMAGE_STAMP:" + base64, passToUse)
+                        if (resultEmoji.isNotEmpty()) {
+                            AppHistory.addEntry("IMAGE", "Converted Image (${bytes.size / 1024} KB)")
+                        }
+                        Toast.makeText(context, "Image successfully transformed to emojis!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "Failed to parse image bitmap.", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Encoding error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
             }
-            Toast.makeText(context, "Image payload encoded!", Toast.LENGTH_SHORT).show()
         }, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(14.dp)) {
-            Text("Smuggle Secret into Emoji", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(if (smuggleMode == 0) "Smuggle Secret into Emoji" else "Convert Image to Emojis", fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
 
         // 5. RESULT
@@ -358,7 +418,7 @@ fun ImageSmugglingScreen() {
             Column(modifier = Modifier.padding(top = 24.dp)) {
                 SectionHeader("Smuggled Output")
                 StandardCard {
-                    Text("Your image payload (copy & share this):", fontSize = 12.sp,
+                    Text("Your secure emoji stream (copy & share this):", fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.padding(bottom = 8.dp))
                     Text(resultEmoji, fontSize = 22.sp, modifier = Modifier.padding(bottom = 16.dp))
