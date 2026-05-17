@@ -1,6 +1,6 @@
 {
-  "name": "emoji-smuggle",
-  "version": "1.0.0",
+  "name": "emoji-smuggle-sdk",
+  "version": "1.0.1",
   "description": "Hide secret data inside emojis using invisible Unicode steganography.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

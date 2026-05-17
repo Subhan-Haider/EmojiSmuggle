@@ -63,12 +63,12 @@ A lightweight, zero-dependency, production-ready steganography engine for Javasc
 
 Install the package:
 ```bash
-npm install emoji-smuggle
+npm install emoji-smuggle-sdk
 ```
 
 ### Basic Steganography
 ```javascript
-import { encodeMessage, decodeMessage } from 'emoji-smuggle';
+import { encodeMessage, decodeMessage } from 'emoji-smuggle-sdk';
 
 // Encode a secret
 const msg = encodeMessage("Meet at dawn 🌅", { carrier: 'cyberpunk' });
