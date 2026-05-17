@@ -551,7 +551,7 @@ fun HomeScreen(navController: NavHostController) {
             OutlinedButton(onClick = { navController.navigate("history") }, modifier = Modifier.weight(1f)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("📜"); Text("History", fontSize = 10.sp) }
             }
-            OutlinedButton(onClick = { }, modifier = Modifier.weight(1f)) {
+            OutlinedButton(onClick = { navController.navigate("settings") }, modifier = Modifier.weight(1f)) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) { Text("ℹ️"); Text("About", fontSize = 10.sp) }
             }
         }
