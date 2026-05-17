@@ -1,65 +1,53 @@
 package tech.subhan.emojismuggle.core
 
 object StegoEngine {
-    private const val BIT_1 = '\u200D' // ZWJ
-    private const val BIT_0 = '\u200C' // ZWNJ
+    private val HEX_TO_EMOJI = listOf(
+        "😀", "😎", "🤖", "👾", "👻", "🦄", "🐼", "🦊", 
+        "⚡", "🔥", "⭐", "🍀", "🍕", "🎮", "🚀", "🎈"
+    )
 
     fun smuggle(message: String, password: String? = null): String {
         val payload = CryptoEngine.encrypt(message, password)
         val bytes = payload.toByteArray(Charsets.UTF_8)
         
-        val binaryChars = CharArray(bytes.size * 8)
-        var charIdx = 0
+        val sb = StringBuilder()
         for (b in bytes) {
             val byteVal = b.toInt() and 0xFF
-            for (bit in 7 downTo 0) {
-                binaryChars[charIdx++] = if (((byteVal shr bit) and 1) == 1) '1' else '0'
-            }
+            val highNibble = (byteVal shr 4) and 0x0F
+            val lowNibble = byteVal and 0x0F
+            sb.append(HEX_TO_EMOJI[highNibble])
+            sb.append(HEX_TO_EMOJI[lowNibble])
         }
-        
-        val hidden = String(binaryChars)
-        val carrier = listOf("🕵️", "📦", "💾", "🔌", "💻", "⚡", "🏙️", "🦾", "🥽", "🌃").shuffled().take(3)
-        
-        val result = StringBuilder()
-        val chunkSize = Math.ceil(hidden.length.toDouble() / carrier.size).toInt()
-        
-        var currentIdx = 0
-        for (emoji in carrier) {
-            result.append(emoji)
-            val end = Math.min(currentIdx + chunkSize, hidden.length)
-            if (currentIdx < hidden.length) {
-                result.append(hidden.substring(currentIdx, end))
-            }
-            currentIdx += chunkSize
-        }
-        
-        return result.toString()
+        return sb.toString()
     }
 
     fun extract(encoded: String, password: String? = null): String {
-        val hiddenChars = CharArray(encoded.length)
-        var hiddenLen = 0
-        for (i in 0 until encoded.length) {
-            val c = encoded[i]
-            if (c == BIT_1 || c == BIT_0) {
-                hiddenChars[hiddenLen++] = c
-            }
+        val emojiToHex = HashMap<String, Int>()
+        for (i in 0 until HEX_TO_EMOJI.size) {
+            emojiToHex[HEX_TO_EMOJI[i]] = i
         }
         
-        if (hiddenLen == 0) return "ERROR: No hidden payload detected."
-        
-        val byteLength = hiddenLen / 8
-        if (byteLength == 0) return "ERROR: Payload too short."
-        
-        val bytes = ByteArray(byteLength)
-        for (i in 0 until byteLength) {
-            var byteVal = 0
-            for (bit in 0..7) {
-                val c = hiddenChars[i * 8 + bit]
-                val bitVal = if (c == BIT_1) 1 else 0
-                byteVal = (byteVal shl 1) or bitVal
+        val parsedNibbles = mutableListOf<Int>()
+        var i = 0
+        while (i < encoded.length) {
+            val codePoint = encoded.codePointAt(i)
+            val emoji = String(Character.toChars(codePoint))
+            val hexVal = emojiToHex[emoji]
+            if (hexVal != null) {
+                parsedNibbles.add(hexVal)
             }
-            bytes[i] = byteVal.toByte()
+            i += Character.charCount(codePoint)
+        }
+        
+        if (parsedNibbles.isEmpty()) return "ERROR: No hidden payload detected."
+        if (parsedNibbles.size % 2 != 0) return "ERROR: Corrupted payload."
+        
+        val byteLength = parsedNibbles.size / 2
+        val bytes = ByteArray(byteLength)
+        for (idx in 0 until byteLength) {
+            val high = parsedNibbles[idx * 2]
+            val low = parsedNibbles[idx * 2 + 1]
+            bytes[idx] = ((high shl 4) or low).toByte()
         }
         
         val rawData = String(bytes, Charsets.UTF_8)
