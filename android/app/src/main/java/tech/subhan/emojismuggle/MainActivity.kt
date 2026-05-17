@@ -766,6 +766,7 @@ fun EncodeScreen() {
 @Composable
 fun DecodeScreen() {
     var encodedText by remember { mutableStateOf("") }
+    var rawStegoText by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var decodedText by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -846,8 +847,20 @@ fun DecodeScreen() {
 
         StandardCard {
             OutlinedTextField(
-                value = encodedText, onValueChange = { encodedText = it }, label = { Text("Paste emoji string here") },
-                modifier = Modifier.fillMaxWidth().height(120.dp), shape = RoundedCornerShape(8.dp)
+                value = encodedText, 
+                onValueChange = { newValue ->
+                    val hasStego = newValue.any { it == '\u200C' || it == '\u200D' }
+                    if (hasStego) {
+                        rawStegoText = newValue
+                        encodedText = newValue.filter { it != '\u200C' && it != '\u200D' }
+                    } else {
+                        encodedText = newValue
+                        rawStegoText = newValue
+                    }
+                }, 
+                label = { Text("Paste emoji string here") },
+                modifier = Modifier.fillMaxWidth().height(120.dp), 
+                shape = RoundedCornerShape(8.dp)
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -863,11 +876,16 @@ fun DecodeScreen() {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             OutlinedButton(onClick = {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                if (clipboard.hasPrimaryClip() && clipboard.primaryClip != null) encodedText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                if (clipboard.hasPrimaryClip() && clipboard.primaryClip != null) {
+                    val clipText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                    rawStegoText = clipText
+                    encodedText = clipText.filter { it != '\u200C' && it != '\u200D' }
+                }
             }, modifier = Modifier.weight(1f).height(56.dp), shape = RoundedCornerShape(12.dp)) { Text("Paste") }
             
             Button(onClick = {
-                decodedText = StegoEngine.extract(encodedText, password)
+                val targetText = if (rawStegoText.any { it == '\u200C' || it == '\u200D' }) rawStegoText else encodedText
+                decodedText = StegoEngine.extract(targetText, password)
                 if (decodedText.isNotEmpty() && !decodedText.startsWith("ERROR")) {
                     AppHistory.addEntry("DECODE", decodedText)
                 }
