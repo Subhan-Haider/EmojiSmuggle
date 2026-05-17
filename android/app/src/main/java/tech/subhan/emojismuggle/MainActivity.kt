@@ -10,6 +10,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -614,6 +617,77 @@ fun DecodeScreen() {
     var decodedText by remember { mutableStateOf("") }
     val context = LocalContext.current
 
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        if (uri != null) {
+            var foundText = ""
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                if (inputStream != null) {
+                    val exif = android.media.ExifInterface(inputStream)
+                    val comment = exif.getAttribute(android.media.ExifInterface.TAG_USER_COMMENT)
+                        ?: exif.getAttribute(android.media.ExifInterface.TAG_IMAGE_DESCRIPTION)
+                    if (!comment.isNullOrBlank()) {
+                        foundText = comment
+                    }
+                    inputStream.close()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            if (foundText.isNotEmpty()) {
+                val decoded = StegoEngine.extract(foundText, password)
+                if (!decoded.startsWith("ERROR")) {
+                    decodedText = decoded
+                    AppHistory.addEntry("DECODE", decoded)
+                    Toast.makeText(context, "Hidden EXIF payload extracted successfully!", Toast.LENGTH_SHORT).show()
+                    return@rememberLauncherForActivityResult
+                }
+            }
+
+            // Fallback: Check for QR codes inside the image
+            try {
+                val image = com.google.mlkit.vision.common.InputImage.fromFilePath(context, uri)
+                val scanner = com.google.mlkit.vision.barcode.BarcodeScanning.getClient()
+                scanner.process(image)
+                    .addOnSuccessListener { barcodes ->
+                        val qrContent = barcodes.firstOrNull()?.rawValue
+                        if (qrContent != null) {
+                            val decoded = StegoEngine.extract(qrContent, password)
+                            decodedText = decoded
+                            if (!decoded.startsWith("ERROR")) {
+                                AppHistory.addEntry("DECODE", decoded)
+                                Toast.makeText(context, "Hidden QR payload extracted successfully!", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            if (decodedText.isEmpty() || decodedText.startsWith("ERROR")) {
+                                decodedText = "ERROR: No hidden payload or QR code found in image."
+                            }
+                        }
+                    }
+                    .addOnFailureListener {
+                        if (decodedText.isEmpty() || decodedText.startsWith("ERROR")) {
+                            decodedText = "ERROR: Failed to process image."
+                        }
+                    }
+            } catch (e: Exception) {
+                decodedText = "ERROR: Failed to parse image."
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            imagePicker.launch("image/*")
+        } else {
+            Toast.makeText(context, "Storage permission required to pick images", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text("Decode Message", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 16.dp))
 
@@ -644,7 +718,41 @@ fun DecodeScreen() {
                 if (decodedText.isNotEmpty() && !decodedText.startsWith("ERROR")) {
                     AppHistory.addEntry("DECODE", decodedText)
                 }
-            }, modifier = Modifier.weight(2f).height(56.dp), shape = RoundedCornerShape(12.dp)) { Text("Decode", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
+            }, modifier = Modifier.weight(2f).height(56.dp), shape = RoundedCornerShape(12.dp)) { Text("Decode Text", fontSize = 15.sp, fontWeight = FontWeight.Bold) }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("🖼️ Image Steganography", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
+                Text("Extract messages embedded in image metadata or QR codes.", 
+                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f), 
+                     fontSize = 12.sp, 
+                     modifier = Modifier.padding(vertical = 8.dp),
+                     textAlign = TextAlign.Center)
+                
+                Button(
+                    onClick = {
+                        val perm = if (android.os.Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES
+                                   else Manifest.permission.READ_EXTERNAL_STORAGE
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED) {
+                            imagePicker.launch("image/*")
+                        } else {
+                            permissionLauncher.launch(perm)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Select Image to Decode", fontWeight = FontWeight.Bold)
+                }
+            }
         }
 
         AnimatedVisibility(visible = decodedText.isNotEmpty(), enter = fadeIn() + expandVertically()) {
