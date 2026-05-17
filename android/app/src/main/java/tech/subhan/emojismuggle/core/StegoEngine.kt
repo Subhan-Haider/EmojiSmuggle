@@ -1,9 +1,23 @@
 package tech.subhan.emojismuggle.core
 
 object StegoEngine {
-    private val HEX_TO_EMOJI = listOf(
-        "😀", "😎", "🤖", "👾", "👻", "🦄", "🐼", "🦊", 
-        "⚡", "🔥", "⭐", "🍀", "🍕", "🎮", "🚀", "🎈"
+    private val EMOJI_VOCAB = listOf(
+        "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰",
+        "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜", "🤪", "🤨", "🧐", "🤓", "😎", "🥸", "🤩", "🥳",
+        "😏", "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤",
+        "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤫", "🫠",
+        "✍️", "👏", "🙌", "👐", "🤲", "🤝", "🙏", "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨",
+        "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐒", "🐵", "🐔", "🐧", "🐦", "🐤", "🐣", "🦆", "🦅", "🦉",
+        "🦇", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🦋", "🐌", "🐜", "🐢", "🐍", "🦎", "🐙", "🦑", "🦐",
+        "🦞", "🦀", "🐡", "🐠", "🐟", "🐬", "🐳", "🐋", "🦈", "🐊", "🐅", "🐆", "🦓", "🦍", "🐘", "🦏",
+        "🦛", "🐫", "🐪", "🦒", "🐃", "🐂", "🐄", "🐎", "🐖", "🐏", "🐑", "🐐", "🦌", "🐕", "🐈", "🐓",
+        "🦃", "🦚", "🦜", "🦢", "🦩", "🕊️", "🐇", "🦝", "🦡", "🦦", "🦥", "🐿️", "🦔", "🐾", "🐉", "🦖",
+        "🦕", "🌵", "🎄", "🌲", "🌳", "🌴", "🌱", "🌿", "🍀", "🍁", "🍂", "🍃", "🍄", "🌰", "🐚", "🕸️",
+        "🕷️", "🦂", "🦟", "🪰", "🪲", "🪳", "⚡", "🔥", "🌈", "☀️", "🌤️", "⛅", "🌥️", "☁️", "🌧️", "⛈️",
+        "🌩️", "❄️", "☃️", "⛄", "🌬️", "💨", "🌪️", "🌫️", "🌊", "💧", "🍕", "🍔", "🍟", "🌭", "🍿", "🍳",
+        "🧇", "🥞", "🍞", "🥐", "🥨", "🥯", "🥖", "🧀", "🥗", "🥙", "🥪", "🌮", "🌯", "🍖", "🍗", "🥩",
+        "🥓", "🍣", "🍤", "🍙", "🍘", "🍛", "🍜", "🍝", "🍢", "🍲", "🥘", "🍧", "🍨", "🍦", "🥧", "🍰",
+        "🎂", "🧁", "🍮", "🍭", "🍬", "🍫", "🍩", "🍪", "🍯", "🧂", "🧈", "🚗", "🚀", "🛸", "🎈", "🎉"
     )
 
     fun smuggle(message: String, password: String? = null): String {
@@ -13,43 +27,32 @@ object StegoEngine {
         val sb = StringBuilder()
         for (b in bytes) {
             val byteVal = b.toInt() and 0xFF
-            val highNibble = (byteVal shr 4) and 0x0F
-            val lowNibble = byteVal and 0x0F
-            sb.append(HEX_TO_EMOJI[highNibble])
-            sb.append(HEX_TO_EMOJI[lowNibble])
+            sb.append(EMOJI_VOCAB[byteVal])
         }
         return sb.toString()
     }
 
     fun extract(encoded: String, password: String? = null): String {
-        val emojiToHex = HashMap<String, Int>()
-        for (i in 0 until HEX_TO_EMOJI.size) {
-            emojiToHex[HEX_TO_EMOJI[i]] = i
+        val emojiToByte = HashMap<String, Byte>()
+        for (i in 0 until EMOJI_VOCAB.size) {
+            emojiToByte[EMOJI_VOCAB[i]] = i.toByte()
         }
         
-        val parsedNibbles = mutableListOf<Int>()
+        val bytesList = mutableListOf<Byte>()
         var i = 0
         while (i < encoded.length) {
             val codePoint = encoded.codePointAt(i)
             val emoji = String(Character.toChars(codePoint))
-            val hexVal = emojiToHex[emoji]
-            if (hexVal != null) {
-                parsedNibbles.add(hexVal)
+            val byteVal = emojiToByte[emoji]
+            if (byteVal != null) {
+                bytesList.add(byteVal)
             }
             i += Character.charCount(codePoint)
         }
         
-        if (parsedNibbles.isEmpty()) return "ERROR: No hidden payload detected."
-        if (parsedNibbles.size % 2 != 0) return "ERROR: Corrupted payload."
+        if (bytesList.isEmpty()) return "ERROR: No hidden payload detected."
         
-        val byteLength = parsedNibbles.size / 2
-        val bytes = ByteArray(byteLength)
-        for (idx in 0 until byteLength) {
-            val high = parsedNibbles[idx * 2]
-            val low = parsedNibbles[idx * 2 + 1]
-            bytes[idx] = ((high shl 4) or low).toByte()
-        }
-        
+        val bytes = bytesList.toByteArray()
         val rawData = String(bytes, Charsets.UTF_8)
         return try {
             CryptoEngine.decrypt(rawData, password)

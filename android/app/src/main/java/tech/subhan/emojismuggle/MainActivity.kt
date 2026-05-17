@@ -633,7 +633,7 @@ fun EncodeScreen() {
                 var bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                 if (bitmap != null) {
                     // Downscale dynamically to prevent memory issues and huge emoji strings
-                    val maxDimension = 320
+                    val maxDimension = 120
                     if (bitmap.width > maxDimension || bitmap.height > maxDimension) {
                         val ratio = bitmap.width.toFloat() / bitmap.height.toFloat()
                         val newWidth = if (bitmap.width > bitmap.height) maxDimension else (maxDimension * ratio).toInt()
