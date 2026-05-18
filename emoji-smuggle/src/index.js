@@ -120,7 +120,7 @@ export function encodeMessage(text, options = {}) {
   const opts = {
     password: null,
     carrier: 'random',
-    compress: true,
+    compress: false,
     ...options
   };
 
