@@ -13,6 +13,20 @@ const Decoder = () => {
   const [isDecoding, setIsDecoding] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
+  const countChar = (str, char) => {
+    if (!str) return 0;
+    let count = 0;
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === char) count++;
+    }
+    return count;
+  };
+  const zw0Count = countChar(input, '\u200B');
+  const zw1Count = countChar(input, '\u200C');
+  const zwsCount = countChar(input, '\u200D');
+  const zwmkCount = countChar(input, '\uFEFF');
+  const totalHidden = zw0Count + zw1Count + zwsCount + zwmkCount;
+
   const handleDecode = () => {
     setIsDecoding(true);
     setTimeout(() => {
@@ -92,6 +106,40 @@ const Decoder = () => {
                  <FileUp size={12} /> DROP_FILE_TO_LOAD
                </div>
             </div>
+
+            {input && (
+              <div className="mt-6 p-5 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] space-y-3">
+                <div className="text-gray-500 uppercase tracking-widest flex justify-between items-center">
+                  <span>Unicode Signal Diagnostics</span>
+                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${totalHidden > 0 ? 'bg-cyber-green/10 text-cyber-green animate-pulse border border-cyber-green/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                    {totalHidden > 0 ? 'SIGNAL_FOUND' : 'NO_CARRIER_SIGNAL'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                  <div className="p-2 bg-white/5 rounded border border-white/5">
+                    <div className="text-[8px] text-gray-500 mb-1">ZWMK (BOM)</div>
+                    <div className={zwmkCount > 0 ? 'text-cyber-green font-bold' : 'text-gray-600'}>{zwmkCount}</div>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded border border-white/5">
+                    <div className="text-[8px] text-gray-500 mb-1">ZW0 (bit 0)</div>
+                    <div className={zw0Count > 0 ? 'text-cyber-green font-bold' : 'text-gray-600'}>{zw0Count}</div>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded border border-white/5">
+                    <div className="text-[8px] text-gray-500 mb-1">ZW1 (bit 1)</div>
+                    <div className={zw1Count > 0 ? 'text-cyber-green font-bold' : 'text-gray-600'}>{zw1Count}</div>
+                  </div>
+                  <div className="p-2 bg-white/5 rounded border border-white/5">
+                    <div className="text-[8px] text-gray-500 mb-1">ZWS (Split)</div>
+                    <div className={zwsCount > 0 ? 'text-cyber-green font-bold' : 'text-gray-600'}>{zwsCount}</div>
+                  </div>
+                </div>
+                {totalHidden === 0 && (
+                  <div className="text-red-400 text-[9px] uppercase tracking-wider text-center pt-1 border-t border-white/5">
+                    ⚠️ WARNING: All hidden characters are missing! Clipboard sync or transfer stripped them.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="glass p-6 border-white/5">
