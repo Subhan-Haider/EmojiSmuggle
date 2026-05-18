@@ -17,7 +17,7 @@ export const AppProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem('smuggle_settings');
       return saved ? JSON.parse(saved) : {
-        theme: 'cyberpunk',
+        theme: 'light',
         sounds: true,
         encryptionLevel: 'standard',
         emojiPack: 'cyberpunk',
@@ -25,7 +25,7 @@ export const AppProvider = ({ children }) => {
       };
     } catch (e) {
       return {
-        theme: 'cyberpunk',
+        theme: 'light',
         sounds: true,
         encryptionLevel: 'standard',
         emojiPack: 'cyberpunk',

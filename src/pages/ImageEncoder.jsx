@@ -147,6 +147,12 @@ const ImageEncoder = () => {
     navigator.clipboard.writeText(encoded);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    confetti({
+      particleCount: 50,
+      spread: 80,
+      origin: { y: 0.8 },
+      colors: ['#00ff41', '#bc13fe']
+    });
   };
 
   const handleDownload = () => {
@@ -412,6 +418,21 @@ const ImageEncoder = () => {
           </div>
         </div>
       </div>
+      {/* Secure Clipboard Toast Notification */}
+      <AnimatePresence>
+        {copied && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, scale: 0.9, x: '-50%' }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-24 left-1/2 z-[200] px-5 py-3 rounded-2xl bg-black/90 border border-cyber-green/40 text-cyber-green font-mono text-[11px] uppercase tracking-[0.15em] flex items-center gap-3 shadow-[0_0_35px_rgba(0,255,65,0.2)] backdrop-blur-md"
+          >
+            <div className="w-2 h-2 rounded-full bg-cyber-green animate-ping" />
+            <span>IMAGE_CARRIER_SECURED_TO_CLIPBOARD</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

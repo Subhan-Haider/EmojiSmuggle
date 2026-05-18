@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Unlock, Terminal, ShieldCheck, Key, AlertTriangle, FileUp, Clipboard, Trash2, Download, Image as ImageIcon } from 'lucide-react';
+import { Unlock, Terminal, ShieldCheck, Key, AlertTriangle, FileUp, Clipboard, Trash2, Download, Image as ImageIcon, CheckCircle } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { extractMessage } from '../utils/stego';
 import { decodeImageFromEmoji, fmtBytes } from '../utils/imageStego';
 import { useApp } from '../context/AppContext';
@@ -12,6 +13,7 @@ const Decoder = () => {
   const [result, setResult] = useState(null);
   const [isDecoding, setIsDecoding] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const countChar = (str, char) => {
     if (!str) return 0;
@@ -69,30 +71,50 @@ const Decoder = () => {
     }
   }, []);
 
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setInput(text);
+      }
+    } catch (err) {
+      console.error('Failed to read clipboard: ', err);
+      alert('CLIPBOARD_ACCESS_DENIED: Please allow clipboard permissions.');
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 w-full">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-12 w-full">
       <div className="flex items-center gap-3 mb-10">
         <div className="p-3 bg-cyber-purple/20 rounded-xl">
           <Unlock className="text-cyber-purple" />
         </div>
         <div>
-          <h1 className="text-3xl font-black uppercase tracking-widest neon-text-purple">Extraction Module</h1>
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-widest neon-text-purple">Extraction Module</h1>
           <p className="text-gray-500 text-sm font-mono italic">DECRYPT_AUTH: INITIALIZED</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
         {/* Left: Input & Drop Zone */}
         <div className="space-y-6">
           <div 
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
-            className={`glass p-8 border-2 transition-all relative ${isDragging ? 'border-cyber-purple bg-cyber-purple/10 scale-105' : 'border-white/5 border-dashed'}`}
+            className={`glass p-5 sm:p-8 border-2 transition-all relative ${isDragging ? 'border-cyber-purple bg-cyber-purple/10 scale-105' : 'border-white/5 border-dashed'}`}
           >
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 block">Inbound transmission</label>
+            <div className="flex justify-between items-center mb-4">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Inbound transmission</label>
+              <button 
+                onClick={handlePaste}
+                className="flex items-center gap-1.5 px-3 py-1 bg-cyber-purple/15 text-cyber-purple border border-cyber-purple/20 hover:bg-cyber-purple/25 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer"
+              >
+                <Clipboard size={10} /> Paste
+              </button>
+            </div>
             <textarea
-              className="cyber-input h-64 resize-none font-mono text-xl bg-transparent border-none p-0 focus:ring-0"
+              className="cyber-input h-64 resize-none font-mono text-base sm:text-lg md:text-xl bg-transparent border-none p-0 focus:ring-0"
               placeholder="Paste emoji cluster or drop .txt file here..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -108,7 +130,7 @@ const Decoder = () => {
             </div>
 
             {input && (
-              <div className="mt-6 p-5 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] space-y-3">
+              <div className="mt-6 p-4 sm:p-5 bg-black/40 rounded-xl border border-white/5 font-mono text-[10px] space-y-3">
                 <div className="text-gray-500 uppercase tracking-widest flex justify-between items-center">
                   <span>Unicode Signal Diagnostics</span>
                   <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${totalHidden > 0 ? 'bg-cyber-green/10 text-cyber-green animate-pulse border border-cyber-green/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
@@ -142,7 +164,7 @@ const Decoder = () => {
             )}
           </div>
 
-          <div className="glass p-6 border-white/5">
+          <div className="glass p-5 sm:p-6 border-white/5">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
               <Key size={12} className="text-cyber-purple" /> Decryption Pass-key
             </label>
@@ -166,7 +188,7 @@ const Decoder = () => {
 
         {/* Right: Results Monitor */}
         <div className="flex flex-col">
-          <div className="glass p-8 flex-grow border-cyber-purple/20 flex flex-col relative overflow-hidden">
+          <div className="glass p-5 sm:p-8 flex-grow border-cyber-purple/20 flex flex-col relative overflow-hidden">
              <div className="absolute top-0 right-0 w-32 h-32 bg-cyber-purple/5 blur-3xl -z-10" />
              
              <div className="flex items-center gap-2 mb-8">
@@ -174,7 +196,7 @@ const Decoder = () => {
                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Decrypted Data Node</span>
              </div>
 
-             <div className={`flex-grow bg-black/60 rounded-2xl p-8 border border-white/5 transition-all duration-500 flex items-center justify-center text-center ${result?.success ? 'border-cyber-green/40 shadow-[0_0_30px_rgba(0,255,65,0.1)]' : ''}`}>
+             <div className={`flex-grow bg-black/60 rounded-2xl p-4 sm:p-8 border border-white/5 transition-all duration-500 flex items-center justify-center text-center ${result?.success ? 'border-cyber-green/40 shadow-[0_0_30px_rgba(0,255,65,0.1)]' : ''}`}>
                 <AnimatePresence mode="wait">
                   {isDecoding ? (
                     <motion.div 
@@ -209,7 +231,7 @@ const Decoder = () => {
                                <div className="text-[10px] text-gray-400 font-mono">SIZE: {fmtBytes(result.byteLength)}</div>
                              </div>
                            ) : (
-                             <div className="text-2xl font-bold text-white break-words leading-relaxed">
+                             <div className="text-lg sm:text-2xl font-bold text-white break-words leading-relaxed px-2">
                                "{result.data}"
                              </div>
                            )}
@@ -251,10 +273,21 @@ const Decoder = () => {
                     </button>
                   ) : (
                     <button 
-                      onClick={() => navigator.clipboard.writeText(result.data)}
-                      className="flex-grow py-3 bg-white/5 border border-white/10 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(result.data);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                        confetti({
+                          particleCount: 50,
+                          spread: 80,
+                          origin: { y: 0.8 },
+                          colors: ['#00ff41', '#bc13fe']
+                        });
+                      }}
+                      className="flex-grow py-3 bg-cyber-green text-black font-black uppercase text-xs tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 cursor-pointer"
                     >
-                      <Clipboard size={14} /> Copy Secret
+                      {copied ? <CheckCircle size={14} /> : <Clipboard size={14} />}
+                      {copied ? 'COPIED!' : 'Copy Secret'}
                     </button>
                   )}
                 </div>
@@ -262,6 +295,21 @@ const Decoder = () => {
           </div>
         </div>
       </div>
+      {/* Secure Clipboard Toast Notification */}
+      <AnimatePresence>
+        {copied && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, scale: 0.9, x: '-50%' }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-24 left-1/2 z-[200] px-5 py-3 rounded-2xl bg-black/90 border border-cyber-purple/40 text-cyber-purple font-mono text-[11px] uppercase tracking-[0.15em] flex items-center gap-3 shadow-[0_0_35px_rgba(188,19,254,0.2)] backdrop-blur-md"
+          >
+            <div className="w-2 h-2 rounded-full bg-cyber-purple animate-ping" />
+            <span>DECRYPTED_PAYLOAD_SECURED_TO_CLIPBOARD</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

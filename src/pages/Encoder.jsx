@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, RefreshCw, Download, Share2, Terminal, ShieldAlert, Key, QrCode, Save, Zap } from 'lucide-react';
+import { Copy, RefreshCw, Download, Share2, Terminal, ShieldAlert, Key, QrCode, Save, Zap, CheckCircle } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { smuggleMessage, getRandomEmojis } from '../utils/stego';
 import { useApp } from '../context/AppContext';
@@ -15,6 +15,7 @@ const Encoder = () => {
   const [isEncoding, setIsEncoding] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (text) {
@@ -27,15 +28,14 @@ const Encoder = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(encoded);
-    if (settings.sounds) {
-      // Trigger success sound or visual feedback
-      confetti({
-        particleCount: 40,
-        spread: 70,
-        origin: { y: 0.8 },
-        colors: ['#00ff41', '#bc13fe']
-      });
-    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    confetti({
+      particleCount: 50,
+      spread: 80,
+      origin: { y: 0.8 },
+      colors: ['#00ff41', '#bc13fe']
+    });
   };
 
   const handleSave = () => {
@@ -62,7 +62,7 @@ const Encoder = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 w-full">
+    <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-12 w-full">
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-cyber-green/20 rounded-xl">
@@ -81,10 +81,10 @@ const Encoder = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
         {/* Left: Input Console */}
-        <div className="space-y-8">
-          <div className="glass p-8 border-white/5">
+        <div className="space-y-6">
+          <div className="glass p-5 sm:p-8 border-white/5">
             <label className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-4 block">Payload Injection</label>
             <textarea
               className="cyber-input h-40 resize-none font-mono text-sm leading-relaxed"
@@ -95,7 +95,7 @@ const Encoder = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass p-6 border-white/5">
+            <div className="glass p-5 sm:p-6 border-white/5">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <Key size={12} className="text-cyber-purple" /> Cryptographic Key
               </label>
@@ -108,13 +108,13 @@ const Encoder = () => {
               />
               <button 
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-[8px] text-gray-600 mt-2 uppercase font-bold hover:text-gray-400 transition-all"
+                className="text-[8px] text-gray-600 mt-2 uppercase font-bold hover:text-gray-400 transition-all cursor-pointer"
               >
                 {showPassword ? "Hide Key" : "Reveal Key"}
               </button>
             </div>
 
-            <div className="glass p-6 border-white/5">
+            <div className="glass p-5 sm:p-6 border-white/5">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                 <ShieldAlert size={12} className="text-cyber-green" /> Carrier Shells
               </label>
@@ -149,7 +149,7 @@ const Encoder = () => {
 
         {/* Right: Output Monitor */}
         <div className="space-y-6 flex flex-col">
-          <div className="glass p-8 border-cyber-green/20 flex-grow flex flex-col overflow-hidden relative">
+          <div className="glass p-5 sm:p-8 border-cyber-green/20 flex-grow flex flex-col overflow-hidden relative">
             {/* Pulsing Glow Overlay */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-green/50 to-transparent animate-pulse" />
             
@@ -179,7 +179,7 @@ const Encoder = () => {
                     animate={{ opacity: 1 }}
                     className="w-full"
                   >
-                    <div className="bg-black/60 rounded-2xl p-8 min-h-[180px] break-all font-mono text-3xl text-center border border-white/5 flex items-center justify-center">
+                    <div className="bg-black/60 rounded-2xl p-4 sm:p-8 min-h-[180px] break-all font-mono text-lg sm:text-2xl md:text-3xl text-center border border-white/5 flex items-center justify-center">
                       {encoded || <span className="text-gray-800 italic text-sm">NO_DATA_STREAM_DETECTED</span>}
                     </div>
                   </motion.div>
@@ -193,7 +193,8 @@ const Encoder = () => {
                 disabled={!encoded}
                 className="flex items-center justify-center gap-2 py-4 bg-cyber-green text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30"
               >
-                <Copy size={14} /> Copy
+                {copied ? <CheckCircle size={14} /> : <Copy size={14} />}
+                {copied ? 'Copied!' : 'Copy'}
               </button>
               <button 
                 onClick={handleSave}
@@ -213,6 +214,21 @@ const Encoder = () => {
           </div>
         </div>
       </div>
+      {/* Secure Clipboard Toast Notification */}
+      <AnimatePresence>
+        {copied && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, scale: 0.9, x: '-50%' }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed bottom-24 left-1/2 z-[200] px-5 py-3 rounded-2xl bg-black/90 border border-cyber-green/40 text-cyber-green font-mono text-[11px] uppercase tracking-[0.15em] flex items-center gap-3 shadow-[0_0_35px_rgba(0,255,65,0.2)] backdrop-blur-md"
+          >
+            <div className="w-2 h-2 rounded-full bg-cyber-green animate-ping" />
+            <span>TRANSMISSION_SECURED_TO_CLIPBOARD</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

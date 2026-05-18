@@ -36,9 +36,9 @@ const App = () => {
         <div className="scanline fixed inset-0 pointer-events-none z-50" />
         
         {/* Premium Floating Navbar */}
-        <header className="fixed top-6 left-0 w-full z-[100] px-6">
-          <nav className="max-w-5xl mx-auto glass px-5 py-3 flex justify-between items-center bg-black/55 backdrop-blur-3xl shadow-2xl shadow-black/40 rounded-2xl">
-            <Link to="/" className="flex items-center gap-3 group" aria-label="EmojiSmuggle home">
+        <header className="fixed top-3 md:top-6 left-0 w-full z-[100] px-3 md:px-6">
+          <nav className="max-w-5xl mx-auto glass px-4 md:px-5 py-3 flex justify-between items-center bg-black/55 backdrop-blur-3xl shadow-2xl shadow-black/40 rounded-2xl">
+            <Link to="/" className="flex items-center gap-3 group mx-auto md:mx-0" aria-label="EmojiSmuggle home">
               <div className="w-10 h-10 bg-gradient-to-br from-cyber-green to-cyber-purple rounded-2xl flex items-center justify-center shadow-lg shadow-cyber-green/20 group-hover:rotate-12 transition-transform duration-500">
                 <Ghost className="text-white w-6 h-6" />
               </div>
@@ -61,37 +61,13 @@ const App = () => {
                 <SettingsIcon size={20} />
               </Link>
             </div>
-
-            {/* Mobile Toggle */}
-            <button className="md:hidden p-2 text-gray-400 hover:text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
           </nav>
 
-          {/* Mobile Menu Overlay */}
-          <AnimatePresence>
-            {isMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="md:hidden mt-4 glass bg-black/90 backdrop-blur-3xl p-6 space-y-4 shadow-2xl border-white/10 max-h-[80vh] overflow-y-auto"
-              >
-                <MobileNavLink to="/dashboard" text="Console" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/encode" text="Text Encode" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/decode" text="Text Decode" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/image-encode" text="Image Smuggler" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/image-decode" text="Image Extractor" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/developers" text="Developers API" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/about" text="About" onClick={() => setIsMenuOpen(false)} />
-                <MobileNavLink to="/settings" text="Settings" onClick={() => setIsMenuOpen(false)} />
-              </motion.div>
-            )}
-          </AnimatePresence>
+
         </header>
 
         {/* Dynamic Content Area */}
-        <main className="flex-grow pt-32 pb-20">
+        <main className="flex-grow pt-24 md:pt-32 pb-28 md:pb-20">
           <AnimatePresence mode="wait">
             <Routes>
               <Route path="/" element={<PageWrapper><Landing /></PageWrapper>} />
@@ -131,6 +107,14 @@ const App = () => {
            </div>
         </footer>
         */}
+        {/* Mobile Bottom Navigation Bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-black/85 backdrop-blur-3xl border-t border-white/10 px-4 py-2 flex justify-around items-center pb-safe">
+          <MobileTabLink to="/dashboard" icon={<LayoutDashboard size={20} />} label="Console" />
+          <MobileTabLink to="/encode" icon={<Lock size={20} />} label="Text" />
+          <MobileTabLink to="/decode" icon={<Unlock size={20} />} label="Decode" />
+          <MobileTabLink to="/image-encode" icon={<ImageIcon size={20} />} label="Images" />
+          <MobileTabLink to="/settings" icon={<SettingsIcon size={20} />} label="Settings" />
+        </div>
       </div>
     </Router>
   );
@@ -266,6 +250,21 @@ const MobileNavLink = ({ to, text, onClick }) => (
     <ChevronRight size={18} className="text-gray-600 group-hover:text-cyber-green" />
   </Link>
 );
+
+const MobileTabLink = ({ to, icon, label }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+  
+  return (
+    <Link 
+      to={to} 
+      className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all gap-1 cursor-pointer ${isActive ? 'text-cyber-green' : 'text-gray-500 hover:text-white'}`}
+    >
+      <span className="transition-transform duration-300 active:scale-75">{icon}</span>
+      <span className="text-[9px] font-black uppercase tracking-wider">{label}</span>
+    </Link>
+  );
+};
 
 const PageWrapper = ({ children }) => (
   <motion.div

@@ -1,8 +1,10 @@
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: "decode-emoji",
-    title: "Decode Emoji Smuggle",
-    contexts: ["selection"]
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: "decode-emoji",
+      title: "Decode Emoji Smuggle",
+      contexts: ["selection"]
+    });
   });
 });
 

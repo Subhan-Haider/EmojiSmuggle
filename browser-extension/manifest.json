@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Emoji Smuggle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Hide secret messages inside innocent emojis using invisible steganography.",
   "permissions": [
     "contextMenus",
