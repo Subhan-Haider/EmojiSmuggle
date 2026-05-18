@@ -119,17 +119,40 @@ const decrypted = decodeMessage(encrypted, "super_secure_key");
 
 ---
 
-## 📱 Compiling the Android App
+## 📱 Compiling & Signing the Android App
 
 To build and run the native Android app:
 
-1. Open the `/android` directory inside Android Studio.
-2. Install dependencies & compile using Gradle:
-   ```bash
-   cd android
-   ./gradlew assembleRelease
-   ```
-3. The optimized, signed release APK will be generated at `/android/app/release/app-release.apk`.
+### 1. Simple PowerShell Builds
+We have included portable, pre-configured PowerShell scripts in the root directory that automatically bind the included JDK 17 and compile the binaries:
+* **Debug APK Build:** Run `.\build_android.ps1` in PowerShell.
+* **Release AAB & APK Build:** Run `.\build_android_release.ps1` in PowerShell.
+
+The finalized release files will be generated directly in the project's root folder:
+* `EmojiSmuggle-release-v5.aab` (Google Play bundle)
+* `EmojiSmuggle-release-v5.apk` (Direct installable APK)
+
+### 2. Manual Command Line Build
+To manually build using Gradle, ensure the JVM home in `android/gradle.properties` matches the compatible JDK 17 (major version 61) to avoid major-version exceptions:
+```properties
+org.gradle.java.home=c:/Users/setup/Videos/WEBSITES FOR CHANGES/emog/temp_jdk/jdk-17.0.19+10
+```
+
+Then compile the release bundle and package via:
+```bash
+cd android
+.\gradlew.bat bundleRelease assembleRelease
+```
+
+### 🔑 Release Signing Credentials
+The production packages are signed automatically during the build process using the local Java keystore file:
+
+| Parameter | Value |
+| :--- | :--- |
+| **Keystore File** | `release-key.jks` (located inside [android/app/](file:///c:/Users/setup/Videos/WEBSITES%20FOR%20CHANGES/emog/android/app/release-key.jks)) |
+| **Keystore Password** | `password123` |
+| **Key Alias** | `emojismuggle` |
+| **Key Password** | `password123` |
 
 ---
 
