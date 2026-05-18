@@ -1001,14 +1001,10 @@ fun DecodeScreen() {
             OutlinedTextField(
                 value = encodedText, 
                 onValueChange = { newValue ->
-                    val hasStego = newValue.any { it == '\u200C' || it == '\u200D' }
-                    if (hasStego) {
-                        rawStegoText = newValue
-                        encodedText = newValue.filter { it != '\u200C' && it != '\u200D' }
-                    } else {
-                        encodedText = newValue
-                        rawStegoText = newValue
-                    }
+                    // Always keep the RAW text (with all zero-width chars) for decoding
+                    rawStegoText = newValue
+                    // For visual display, strip ONLY ​ ‌ ‍ ﻿ so user sees only emojis
+                    encodedText = newValue.filter { c -> c != '\u200B' && c != '\u200C' && c != '\u200D' && c != '\uFEFF' }
                 }, 
                 label = { Text("Paste emoji string here") },
                 modifier = Modifier.fillMaxWidth().height(120.dp), 
@@ -1030,13 +1026,16 @@ fun DecodeScreen() {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 if (clipboard.hasPrimaryClip() && clipboard.primaryClip != null) {
                     val clipText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
+                    // Keep raw text with all zero-width chars for decoding
                     rawStegoText = clipText
-                    encodedText = clipText.filter { it != '\u200C' && it != '\u200D' }
+                    // Strip invisible chars for visual display only
+                    encodedText = clipText.filter { c -> c != '\u200B' && c != '\u200C' && c != '\u200D' && c != '\uFEFF' }
                 }
             }, modifier = Modifier.weight(1f).height(56.dp), shape = RoundedCornerShape(12.dp)) { Text("Paste") }
             
             Button(onClick = {
-                val targetText = if (rawStegoText.any { it == '\u200C' || it == '\u200D' }) rawStegoText else encodedText
+                // Always decode from rawStegoText which preserves all zero-width chars
+                val targetText = if (rawStegoText.isNotEmpty()) rawStegoText else encodedText
                 decodedText = StegoEngine.extract(targetText, password)
                 if (decodedText.isNotEmpty() && !decodedText.startsWith("ERROR")) {
                     AppHistory.addEntry("DECODE", decodedText)
