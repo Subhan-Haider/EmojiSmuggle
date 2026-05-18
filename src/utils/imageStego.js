@@ -142,16 +142,28 @@ export function decodeImageFromEmoji(emojiString, password = '') {
     if (ch === ZW0 || ch === ZW1 || ch === ZWS || ch === ZWMK) zw += ch;
   }
 
-  const hi = zw.indexOf(HDR);
+  let hi = zw.indexOf(HDR);
   let fi = zw.lastIndexOf(FTR);
-  if (fi === -1) {
+  let hdrLen = HDR.length;
+  
+  if (hi !== -1 && fi === -1) {
     fi = zw.lastIndexOf(FTR_TRIMMED);
   }
+  
+  if (hi === -1 || fi === -1 || fi <= hi) {
+    const HDR_NO_BOM = ZW0 + ZW1 + ZW0 + ZW1;
+    const FTR_NO_BOM = ZW1 + ZW0 + ZW1 + ZW0;
+    
+    hi = zw.indexOf(HDR_NO_BOM);
+    fi = zw.lastIndexOf(FTR_NO_BOM);
+    hdrLen = HDR_NO_BOM.length;
+  }
+
   if (hi === -1 || fi === -1 || fi <= hi) {
     return { success: false, error: 'NO_IMAGE_PAYLOAD_DETECTED' };
   }
 
-  const payload = zw.slice(hi + HDR.length, fi);
+  const payload = zw.slice(hi + hdrLen, fi);
   const allBits = zwToBits(payload);
   if (allBits.length < 33) return { success: false, error: 'PAYLOAD_TOO_SHORT' };
 

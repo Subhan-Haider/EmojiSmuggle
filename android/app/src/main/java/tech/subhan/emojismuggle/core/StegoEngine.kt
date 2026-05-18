@@ -60,19 +60,28 @@ object StegoEngine {
         }
         return result.toString()
     }
-
     fun extract(encoded: String, password: String? = null): String {
-        val startIdx = encoded.indexOf(SIGNATURE)
+        var startIdx = encoded.indexOf(SIGNATURE)
         var endIdx = encoded.lastIndexOf(SIGNATURE_END)
-        if (endIdx == -1) {
+        var sigLen = SIGNATURE.length
+        
+        if (startIdx != -1 && endIdx == -1) {
             endIdx = encoded.lastIndexOf(SIGNATURE_END_TRIMMED)
+        }
+        
+        if (startIdx == -1 || endIdx == -1 || startIdx >= endIdx) {
+            val signatureNoBom = "$ZW0$ZW1$ZW0$ZW1"
+            val signatureEndNoBom = "$ZW1$ZW0$ZW1$ZW0"
+            startIdx = encoded.indexOf(signatureNoBom)
+            endIdx = encoded.lastIndexOf(signatureEndNoBom)
+            sigLen = signatureNoBom.length
         }
         
         if (startIdx == -1 || endIdx == -1 || startIdx >= endIdx) {
             return "ERROR: No valid hidden message signature found."
         }
         
-        val rawZw = encoded.substring(startIdx + SIGNATURE.length, endIdx)
+        val rawZw = encoded.substring(startIdx + sigLen, endIdx)
         val zwList = mutableListOf<Char>()
         for (i in 0 until rawZw.length) {
             val c = rawZw[i]

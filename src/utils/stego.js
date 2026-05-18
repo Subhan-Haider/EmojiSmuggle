@@ -78,17 +78,28 @@ export const smuggleMessage = (text, password = '', emojiTemplate = '📦') => {
 };
 
 export const extractMessage = (encoded, password = '') => {
-  const startIdx = encoded.indexOf(SIGNATURE);
+  let startIdx = encoded.indexOf(SIGNATURE);
   let endIdx = encoded.lastIndexOf(SIGNATURE_END);
-  if (endIdx === -1) {
+  let sigLen = SIGNATURE.length;
+  
+  if (startIdx !== -1 && endIdx === -1) {
     endIdx = encoded.lastIndexOf(SIGNATURE_END_TRIMMED);
+  }
+  
+  if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
+    const SIGNATURE_NO_BOM = ZW0 + ZW1 + ZW0 + ZW1;
+    const SIGNATURE_END_NO_BOM = ZW1 + ZW0 + ZW1 + ZW0;
+    
+    startIdx = encoded.indexOf(SIGNATURE_NO_BOM);
+    endIdx = encoded.lastIndexOf(SIGNATURE_END_NO_BOM);
+    sigLen = SIGNATURE_NO_BOM.length;
   }
   
   if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
     return { success: false, error: 'NO_HIDDEN_DATA' };
   }
 
-  const rawZw = encoded.substring(startIdx + SIGNATURE.length, endIdx);
+  const rawZw = encoded.substring(startIdx + sigLen, endIdx);
   let cleanZw = '';
   for (const char of rawZw) {
     if (char === ZW0 || char === ZW1) cleanZw += char;
