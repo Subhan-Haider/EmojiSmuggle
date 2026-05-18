@@ -10,6 +10,7 @@ const ZWMK = '\uFEFF'; // BOM                     → magic marker
 // Unique header/footer signature to detect hidden image data
 const HDR = ZWMK + ZW0 + ZW1 + ZW0 + ZW1 + ZWMK;
 const FTR = ZWMK + ZW1 + ZW0 + ZW1 + ZW0 + ZWMK;
+const FTR_TRIMMED = ZWMK + ZW1 + ZW0 + ZW1 + ZW0;
 
 export const IMAGE_EMOJI_PACKS = {
   cyberpunk: ['🕵️','📦','💾','💿','🔌','💻','📡','🔋','⚡','🌃','🔒','👁️','🤫','👾','🦾'],
@@ -142,7 +143,10 @@ export function decodeImageFromEmoji(emojiString, password = '') {
   }
 
   const hi = zw.indexOf(HDR);
-  const fi = zw.lastIndexOf(FTR);
+  let fi = zw.lastIndexOf(FTR);
+  if (fi === -1) {
+    fi = zw.lastIndexOf(FTR_TRIMMED);
+  }
   if (hi === -1 || fi === -1 || fi <= hi) {
     return { success: false, error: 'NO_IMAGE_PAYLOAD_DETECTED' };
   }
@@ -153,6 +157,10 @@ export function decodeImageFromEmoji(emojiString, password = '') {
 
   const byteLen = parseInt(allBits.slice(0, 32), 2);
   const isEncrypted = allBits[32] === '1';
+  const availableBytes = Math.floor((allBits.length - 33) / 8);
+  if (!Number.isFinite(byteLen) || byteLen <= 0 || byteLen > availableBytes) {
+    return { success: false, error: 'NO_IMAGE_PAYLOAD_DETECTED' };
+  }
   const dataBits = allBits.slice(33, 33 + byteLen * 8);
   if (dataBits.length < byteLen * 8) return { success: false, error: 'CORRUPTED_PAYLOAD' };
 

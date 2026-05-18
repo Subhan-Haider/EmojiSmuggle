@@ -5,6 +5,7 @@ const ZWMK = '\uFEFF';
 
 const SIGNATURE = ZWMK + ZW0 + ZW1 + ZW0 + ZW1 + ZWMK;
 const SIGNATURE_END = ZWMK + ZW1 + ZW0 + ZW1 + ZW0 + ZWMK;
+const SIGNATURE_END_TRIMMED = ZWMK + ZW1 + ZW0 + ZW1 + ZW0;
 
 const EMOJI_PACKS = {
   cyberpunk: ['🕵️', '📦', '💾', '💿', '🔌', '💻', '📡', '🔋', '🦾', '🦿', '🥽', '🏙️', '🌃', '⚡', '🌌'],
@@ -93,7 +94,10 @@ function smuggleMessage(text, password = '', emojiTemplate = '🕵️📦💾�
 
 function extractMessage(encoded, password = '') {
   const startIdx = encoded.indexOf(SIGNATURE);
-  const endIdx = encoded.indexOf(SIGNATURE_END);
+  let endIdx = encoded.lastIndexOf(SIGNATURE_END);
+  if (endIdx === -1) {
+    endIdx = encoded.lastIndexOf(SIGNATURE_END_TRIMMED);
+  }
   
   if (startIdx === -1 || endIdx === -1 || startIdx >= endIdx) {
     return { success: false, error: 'NO_HIDDEN_DATA' };

@@ -8,6 +8,7 @@ object StegoEngine {
 
     private val SIGNATURE = "$ZWMK$ZW0$ZW1$ZW0$ZW1$ZWMK"
     private val SIGNATURE_END = "$ZWMK$ZW1$ZW0$ZW1$ZW0$ZWMK"
+    private val SIGNATURE_END_TRIMMED = "$ZWMK$ZW1$ZW0$ZW1$ZW0"
 
     private val CARRIER_POOL = listOf(
         "🕵️", "💬", "🔒", "⚡", "📦", "💾", "💻", "🔑", "🛡️", "🔮", "🖼️", "🔌", "🦾", "🥽", "🌃",
@@ -62,7 +63,10 @@ object StegoEngine {
 
     fun extract(encoded: String, password: String? = null): String {
         val startIdx = encoded.indexOf(SIGNATURE)
-        val endIdx = encoded.indexOf(SIGNATURE_END)
+        var endIdx = encoded.lastIndexOf(SIGNATURE_END)
+        if (endIdx == -1) {
+            endIdx = encoded.lastIndexOf(SIGNATURE_END_TRIMMED)
+        }
         
         if (startIdx == -1 || endIdx == -1 || startIdx >= endIdx) {
             return "ERROR: No valid hidden message signature found."
@@ -107,6 +111,7 @@ object StegoEngine {
     }
 
     fun containsStego(encoded: String): Boolean {
-        return encoded.contains(SIGNATURE) && encoded.contains(SIGNATURE_END)
+        return encoded.contains(SIGNATURE) &&
+            (encoded.contains(SIGNATURE_END) || encoded.contains(SIGNATURE_END_TRIMMED))
     }
 }

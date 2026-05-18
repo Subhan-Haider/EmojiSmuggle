@@ -998,16 +998,14 @@ fun DecodeScreen() {
         Text("Decode Message", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 16.dp))
 
         StandardCard {
+            // READ-ONLY display field — shows only visible emoji (zero-width chars stripped for display)
+            // The actual full text with zero-width chars is always read directly from clipboard via rawStegoText
             OutlinedTextField(
-                value = encodedText, 
-                onValueChange = { newValue ->
-                    // Always keep the RAW text (with all zero-width chars) for decoding
-                    rawStegoText = newValue
-                    // For visual display, strip ONLY ​ ‌ ‍ ﻿ so user sees only emojis
-                    encodedText = newValue.filter { c -> c != '\u200B' && c != '\u200C' && c != '\u200D' && c != '\uFEFF' }
-                }, 
-                label = { Text("Paste emoji string here") },
-                modifier = Modifier.fillMaxWidth().height(120.dp), 
+                value = encodedText,
+                onValueChange = { /* Read-only: use Paste button below */ },
+                label = { Text("Emoji string (use Paste button below)") },
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth().height(120.dp),
                 shape = RoundedCornerShape(8.dp)
             )
             
@@ -1025,16 +1023,17 @@ fun DecodeScreen() {
             OutlinedButton(onClick = {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 if (clipboard.hasPrimaryClip() && clipboard.primaryClip != null) {
+                    // Read RAW clipboard text — zero-width chars survive here intact
                     val clipText = clipboard.primaryClip?.getItemAt(0)?.text?.toString() ?: ""
-                    // Keep raw text with all zero-width chars for decoding
                     rawStegoText = clipText
-                    // Strip invisible chars for visual display only
+                    // Display-only: show just the visible emoji characters
                     encodedText = clipText.filter { c -> c != '\u200B' && c != '\u200C' && c != '\u200D' && c != '\uFEFF' }
+                    Toast.makeText(context, "Pasted! Found ${clipText.length} chars (${rawStegoText.count { c -> c == '\u200B' || c == '\u200C' }} hidden bits)", Toast.LENGTH_SHORT).show()
                 }
             }, modifier = Modifier.weight(1f).height(56.dp), shape = RoundedCornerShape(12.dp)) { Text("Paste") }
             
             Button(onClick = {
-                // Always decode from rawStegoText which preserves all zero-width chars
+                // Always decode from rawStegoText which has the full unstripped clipboard content
                 val targetText = if (rawStegoText.isNotEmpty()) rawStegoText else encodedText
                 decodedText = StegoEngine.extract(targetText, password)
                 if (decodedText.isNotEmpty() && !decodedText.startsWith("ERROR")) {

@@ -37,4 +37,14 @@ class StegoTest {
         val extracted = StegoEngine.extract(jsEncoded)
         assertEquals("hello", extracted)
     }
+
+    @Test
+    fun testDecodePayloadWithTrimmedTrailingMarker() {
+        val original = "message copied through a trimming surface"
+        val smuggled = StegoEngine.smuggle(original)
+        val trimmedByClipboardSurface = smuggled.trim()
+
+        assertTrue(StegoEngine.containsStego(trimmedByClipboardSurface))
+        assertEquals(original, StegoEngine.extract(trimmedByClipboardSurface))
+    }
 }

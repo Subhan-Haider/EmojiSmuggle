@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const outputDecode = document.getElementById('decode-output');
 
   btnDecode.addEventListener('click', () => {
-    const text = inputDecode.value.trim();
+    const text = inputDecode.value;
     if (!text) return;
 
     const pass = inputDecodePass.value;

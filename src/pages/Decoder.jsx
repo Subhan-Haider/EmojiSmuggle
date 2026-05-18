@@ -24,9 +24,22 @@ const Decoder = () => {
         if (imgRes.success) addToHistory({ type: 'image-decode', isEncrypted: imgRes.isEncrypted });
       } else {
         const txtRes = extractMessage(input, password);
-        setResult({ ...txtRes, type: 'text' });
-        setIsDecoding(false);
-        if (txtRes.success) addToHistory({ type: 'decode', payload: txtRes.data, isEncrypted: txtRes.encrypted });
+        if (txtRes.success && txtRes.data && txtRes.data.startsWith('IMAGE_STAMP:')) {
+          const b64 = txtRes.data.replace('IMAGE_STAMP:', '');
+          setResult({
+            success: true,
+            type: 'image',
+            dataUrl: `data:image/jpeg;base64,${b64}`,
+            byteLength: Math.floor(b64.length * 0.75),
+            isEncrypted: txtRes.encrypted
+          });
+          setIsDecoding(false);
+          addToHistory({ type: 'image-decode', isEncrypted: txtRes.encrypted });
+        } else {
+          setResult({ ...txtRes, type: 'text' });
+          setIsDecoding(false);
+          if (txtRes.success) addToHistory({ type: 'decode', payload: txtRes.data, isEncrypted: txtRes.encrypted });
+        }
       }
     }, 800);
   };

@@ -5,6 +5,7 @@ import {
   Eye, EyeOff, Cpu, Image as ImageIcon, Scan, Copy
 } from 'lucide-react';
 import { decodeImageFromEmoji, countHiddenChars, fmtBytes } from '../utils/imageStego';
+import { extractMessage } from '../utils/stego';
 import { useApp } from '../context/AppContext';
 
 const SAMPLE = '🕵️📦💾💿🔌💻📡🔋⚡🌃🔒👁️🤫👾🦾🕵️📦💾💿🔌';
@@ -32,7 +33,22 @@ const ImageDecoder = () => {
     setRevealed(false);
     await new Promise(r => setTimeout(r, 800));
 
-    const res = decodeImageFromEmoji(input, password);
+    let res = decodeImageFromEmoji(input, password);
+    
+    // Fallback for Android IMAGE_STAMP payloads
+    if (!res.success && res.error === 'NO_IMAGE_PAYLOAD_DETECTED') {
+      const txtRes = extractMessage(input, password);
+      if (txtRes.success && txtRes.data && txtRes.data.startsWith('IMAGE_STAMP:')) {
+        const b64 = txtRes.data.replace('IMAGE_STAMP:', '');
+        res = {
+          success: true,
+          dataUrl: `data:image/jpeg;base64,${b64}`,
+          byteLength: Math.floor(b64.length * 0.75),
+          isEncrypted: txtRes.encrypted || false
+        };
+      }
+    }
+
     if (res.success) {
       setResult(res);
       setTimeout(() => setRevealed(true), 300);
