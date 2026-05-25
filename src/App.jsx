@@ -186,6 +186,34 @@ const SiteFooter = () => {
               <Music size={20} />
             </a>
           </div>
+          <div className="mt-6 flex flex-col gap-3">
+            <a href="https://chromewebstore.google.com/detail/ckpmnmlhinfjjlgahbcfobmbcdjlomia?utm_source=item-share-cb" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-slate-300 transition hover:border-white/25 hover:bg-white/[0.08] hover:text-white hover:-translate-y-0.5 w-fit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-[#4285F4] flex-shrink-0">
+                <path d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM12 16.5C14.48 16.5 16.5 14.48 16.5 12C16.5 9.52 14.48 7.5 12 7.5C9.52 7.5 7.5 9.52 7.5 12C7.5 14.48 9.52 16.5 12 16.5ZM12.72 4C16.59 4 19.78 6.55 20.69 10H14.8C16.7 4.9 18 6.7 18 8.87C18 9.92 17.7 10.96 17.27 11.96L12.69 4H12.72ZM4.67 15.6C5.56 15.54 7.46 17 9.7 17C11 17 12.18 16.33 12.76 15.3H7.4C7.03 15.3 6.67 15.27 6.35 15.2C5.92 13.68 6 12 6.64 10.5C7.11 9.25 8.04 8.2 9.26 7.66L4.67 15.6ZM11.16 20V22.25C10.7 22.25 10.22 22.2 9.74 22.2L14.33 14.24C13.84 14.47 13.29 14.6 12.72 14.6H4.19C5.06 17.72 7.81 20 11.16 20Z"/>
+              </svg>
+              <div className="flex flex-col leading-tight">
+                <span className="text-[9px] uppercase tracking-widest text-slate-500">Available on</span>
+                <span className="text-xs font-black uppercase tracking-wider">Chrome Extension</span>
+              </div>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=tech.subhan.emojismuggle" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs font-bold text-slate-300 transition hover:border-white/25 hover:bg-white/[0.08] hover:text-white hover:-translate-y-0.5 w-fit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="flex-shrink-0">
+                <path d="M3.18 23.76a2 2 0 0 1-1-.27 2 2 0 0 1-1-1.76V2.27a2 2 0 0 1 1-1.76 2 2 0 0 1 2 0l17.42 10a2 2 0 0 1 0 3.46l-17.42 10a2 2 0 0 1-1 .29z" fill="url(#play-grad-footer)"/>
+                <defs>
+                  <linearGradient id="play-grad-footer" x1="3" y1="0" x2="21" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#00D4FF"/>
+                    <stop offset="33%" stopColor="#00E676"/>
+                    <stop offset="66%" stopColor="#FFEB3B"/>
+                    <stop offset="100%" stopColor="#FF5252"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="flex flex-col leading-tight">
+                <span className="text-[9px] uppercase tracking-widest text-slate-500">Get it on</span>
+                <span className="text-xs font-black uppercase tracking-wider">Google Play</span>
+              </div>
+            </a>
+          </div>
         </div>
 
         {groups.map((group) => (
